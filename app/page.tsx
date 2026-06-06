@@ -1,31 +1,31 @@
 import Link from "next/link";
 
 const categories = [
-  { name: "Fruits", emoji: "🍎", tint: "bg-red-50" },
-  { name: "Vegetables", emoji: "🥦", tint: "bg-green-50" },
-  { name: "Dairy", emoji: "🥛", tint: "bg-blue-50" },
-  { name: "Bakery", emoji: "🥐", tint: "bg-amber-50" },
-  { name: "Meat", emoji: "🥩", tint: "bg-rose-50" },
-  { name: "Beverages", emoji: "🧃", tint: "bg-orange-50" },
-  { name: "Snacks", emoji: "🍿", tint: "bg-yellow-50" },
-  { name: "Frozen", emoji: "🍦", tint: "bg-sky-50" },
+  { name: "Fruits", emoji: "/dashboard/watermelon.png", tint: "bg-red-50" },
+  { name: "Vegetables", emoji: "/dashboard/carrots.png", tint: "bg-green-50" },
+  { name: "Dairy", emoji: "/dashboard/milk-carton.png", tint: "bg-blue-50" },
+  { name: "Bakery", emoji: "/dashboard/bread.png", tint: "bg-amber-50" },
+  { name: "Meat", emoji: "/dashboard/beef.png", tint: "bg-rose-50" },
+  { name: "Beverages", emoji: "/dashboard/burger.png", tint: "bg-orange-50" },
+  { name: "Snacks", emoji: "/dashboard/popcorn.png", tint: "bg-yellow-50" },
+  { name: "Frozen", emoji: "/dashboard/ice-creams.png", tint: "bg-sky-50" },
 ];
 
 const products = [
-  { name: "Organic Bananas", price: "$1.49", unit: "/ kg", emoji: "🍌", tag: "Fresh" },
-  { name: "Avocado Hass", price: "$2.99", unit: "/ pack", emoji: "🥑", tag: "Best Seller" },
-  { name: "Whole Milk", price: "$3.20", unit: "/ 1L", emoji: "🥛", tag: "Daily" },
-  { name: "Sourdough Loaf", price: "$4.50", unit: "/ each", emoji: "🍞", tag: "Bakery" },
-  { name: "Strawberries", price: "$3.99", unit: "/ box", emoji: "🍓", tag: "Seasonal" },
-  { name: "Free-range Eggs", price: "$5.20", unit: "/ dozen", emoji: "🥚", tag: "Organic" },
-  { name: "Brown Rice", price: "$2.10", unit: "/ kg", emoji: "🌾", tag: "Pantry" },
-  { name: "Cherry Tomatoes", price: "$2.80", unit: "/ pack", emoji: "🍅", tag: "Fresh" },
+  { name: "Organic Bananas", price: "RS.200", unit: "/ kg", emoji: "/product/banana.png", tag: "Fresh" },
+  { name: "Avocado Hass", price: "RS.299", unit: "/ pack", emoji: "/product/avacado.png", tag: "Best Seller" },
+  { name: "Whole Milk", price: "RS.320", unit: "/ 1L", emoji: "/product/milk-box.png", tag: "Daily" },
+  { name: "Snacks", price: "RS.450", unit: "/ each", emoji: "/product/snack.png", tag: "Bakery" },
+  { name: "Strawberries", price: "RS.399", unit: "/ box", emoji: "/product/strawberry.png", tag: "Seasonal" },
+  { name: "Free-range Eggs", price: "RS.520", unit: "/ dozen", emoji: "/product/eggs.png", tag: "Organic" },
+  { name: "Brown Rice", price: "RS.210", unit: "/ kg", emoji: "/product/wheat.png", tag: "Pantry" },
+  { name: "Cherry Tomatoes", price: "RS.80", unit: "/ kg", emoji: "/product/tomato.png", tag: "Fresh" },
 ];
 
 const features = [
   {
-    title: "Free delivery over $40",
-    body: "Same-day delivery on orders above $40 within the city.",
+    title: "Free delivery over 3km",
+    body: "Same-day delivery on orders above $40 within the city. ",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <rect x="1" y="3" width="15" height="13" />
@@ -46,8 +46,8 @@ const features = [
     ),
   },
   {
-    title: "Easy returns",
-    body: "Not happy with an item? Return it at the door, no questions asked.",
+    title: "Cancel Order Before Dispatched",
+    body: "Changed your mind? Cancel your order easily before it leaves our store.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <polyline points="1 4 1 10 7 10" />
@@ -131,9 +131,8 @@ export default function Home() {
               ].map((p, i) => (
                 <div
                   key={p.n}
-                  className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-border ${
-                    i % 2 === 1 ? "translate-y-6" : ""
-                  }`}
+                  className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-border ${i % 2 === 1 ? "translate-y-6" : ""
+                    }`}
                 >
                   <div className="flex h-24 items-center justify-center rounded-xl bg-brand-light text-5xl">
                     {p.e}
@@ -175,7 +174,8 @@ export default function Home() {
               className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-white p-4 text-center transition-shadow hover:shadow-md"
             >
               <div className={`flex h-16 w-16 items-center justify-center rounded-full text-3xl ${c.tint}`}>
-                {c.emoji}
+
+                <img src={c.emoji}  />
               </div>
               <span className="text-sm font-medium group-hover:text-brand">{c.name}</span>
             </Link>
@@ -212,9 +212,10 @@ export default function Home() {
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                     </svg>
                   </button>
-                  <span>{p.emoji}</span>
-                </div>
+                <img className="h-20 w-20" src={p.emoji} key={p.name} alt={p.name} />
+                 </div>
                 <div className="mt-3 flex flex-1 flex-col">
+                 
                   <h3 className="text-sm font-semibold text-foreground">{p.name}</h3>
                   <p className="text-xs text-muted">In stock</p>
                   <div className="mt-3 flex items-center justify-between">
@@ -283,9 +284,8 @@ export default function Home() {
               {["🍇", "🥦", "🍞", "🧀"].map((e, i) => (
                 <span
                   key={i}
-                  className={`flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 text-4xl backdrop-blur ${
-                    i % 2 === 1 ? "translate-y-4" : ""
-                  }`}
+                  className={`flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 text-4xl backdrop-blur ${i % 2 === 1 ? "translate-y-4" : ""
+                    }`}
                 >
                   {e}
                 </span>
