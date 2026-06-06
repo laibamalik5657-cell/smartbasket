@@ -1,25 +1,25 @@
 import Link from "next/link";
 
 const categories = [
-  { name: "Fruits", emoji: "/dashboard/watermelon.png", tint: "bg-red-50" },
-  { name: "Vegetables", emoji: "/dashboard/carrots.png", tint: "bg-green-50" },
-  { name: "Dairy", emoji: "/dashboard/milk-carton.png", tint: "bg-blue-50" },
-  { name: "Bakery", emoji: "/dashboard/bread.png", tint: "bg-amber-50" },
-  { name: "Meat", emoji: "/dashboard/beef.png", tint: "bg-rose-50" },
-  { name: "Beverages", emoji: "/dashboard/burger.png", tint: "bg-orange-50" },
+  { name: "Vegetables", emoji: "/dashboard/carrots.png", tint: "bg-red-50" },
+  { name: "Fruits", emoji: "/dashboard/apple.png", tint: "bg-green-50" },
+  { name: "Dairy", emoji: "/dashboard/milk-bottle.png", tint: "bg-blue-50" },
+  { name: "Bakery", emoji: "/dashboard/white-bread.png", tint: "bg-amber-50" },
+  { name: "Meat", emoji: "/dashboard/chicken.png", tint: "bg-rose-50" },
+  { name: "Beverages", emoji: "/dashboard/drink.png", tint: "bg-orange-50" },
   { name: "Snacks", emoji: "/dashboard/popcorn.png", tint: "bg-yellow-50" },
-  { name: "Frozen", emoji: "/dashboard/ice-creams.png", tint: "bg-sky-50" },
+  { name: "Frozen", emoji: "/dashboard/ice-cream.png", tint: "bg-sky-50" },
 ];
 
 const products = [
-  { name: "Organic Bananas", price: "RS.200", unit: "/ kg", emoji: "/product/banana.png", tag: "Fresh" },
-  { name: "Avocado Hass", price: "RS.299", unit: "/ pack", emoji: "/product/avacado.png", tag: "Best Seller" },
-  { name: "Whole Milk", price: "RS.320", unit: "/ 1L", emoji: "/product/milk-box.png", tag: "Daily" },
-  { name: "Snacks", price: "RS.450", unit: "/ each", emoji: "/product/snack.png", tag: "Bakery" },
-  { name: "Strawberries", price: "RS.399", unit: "/ box", emoji: "/product/strawberry.png", tag: "Seasonal" },
-  { name: "Free-range Eggs", price: "RS.520", unit: "/ dozen", emoji: "/product/eggs.png", tag: "Organic" },
-  { name: "Brown Rice", price: "RS.210", unit: "/ kg", emoji: "/product/wheat.png", tag: "Pantry" },
-  { name: "Cherry Tomatoes", price: "RS.80", unit: "/ kg", emoji: "/product/tomato.png", tag: "Fresh" },
+  { name: "Bananas", price: "Rs.250", unit: "/ dozen", emoji: "/products/bananas.png", tag: "Fresh" },
+  { name: "bread", price: "Rs.180", unit: "/ 1 pack", emoji: "/products/white-bread.png", tag: "Best Seller" },
+  { name: "Milk", price: "Rs.220", unit: "/ 1L", emoji: "/products/milk.png", tag: "Daily" },
+  { name: "Flour", price: "Rs.1100", unit: "/ 10 kg", emoji: "/products/flour.png", tag: "Bakery" },
+  { name: "Rice", price: "Rs.400", unit: "/ 1 kg", emoji: "/products/rice.png", tag: "Seasonal" },
+  { name: "Eggs", price: "Rs.350", unit: "/1 dozen", emoji: "/products/eggs.png", tag: "Organic" },
+  { name: "Cooking oil", price: "Rs.520", unit: "/1 kg", emoji: "/products/oil.png", tag: "Pantry" },
+  { name: "Chips", price: "Rs.60", unit: "/1 pack", emoji: "/products/milk.png", tag: "Fresh" },
 ];
 
 const features = [
@@ -124,10 +124,10 @@ export default function Home() {
             <div className="absolute -right-4 bottom-0 h-48 w-48 rounded-full bg-amber-200/40 blur-2xl" />
             <div className="relative grid grid-cols-2 gap-4">
               {[
-                { e: "🥑", n: "Avocado", p: "$2.99" },
-                { e: "🍓", n: "Strawberry", p: "$3.99" },
-                { e: "🥕", n: "Carrot", p: "$1.20" },
-                { e: "🥬", n: "Lettuce", p: "$1.80" },
+                { e: "🥑", n: "Avocado", p: "Rs.300" },
+                { e: "🍓", n: "Strawberry", p: "Rs.350" },
+                { e: "🥕", n: "Carrot", p: "Rs.170" },
+                { e: "🥬", n: "Lettuce", p: "Rs.320" },
               ].map((p, i) => (
                 <div
                   key={p.n}
@@ -173,9 +173,9 @@ export default function Home() {
               href="/"
               className="group flex flex-col items-center gap-2 rounded-2xl border border-border bg-white p-4 text-center transition-shadow hover:shadow-md"
             >
+              
               <div className={`flex h-16 w-16 items-center justify-center rounded-full text-3xl ${c.tint}`}>
-
-                <img src={c.emoji}  />
+              <img src={c.emoji} />
               </div>
               <span className="text-sm font-medium group-hover:text-brand">{c.name}</span>
             </Link>
@@ -212,10 +212,10 @@ export default function Home() {
                       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                     </svg>
                   </button>
-                <img className="h-20 w-20" src={p.emoji} key={p.name} alt={p.name} />
-                 </div>
+                 <img className="h-20 w-20" src={p.emoji} alt={p.name} />
+                </div>
                 <div className="mt-3 flex flex-1 flex-col">
-                 
+                  
                   <h3 className="text-sm font-semibold text-foreground">{p.name}</h3>
                   <p className="text-xs text-muted">In stock</p>
                   <div className="mt-3 flex items-center justify-between">
