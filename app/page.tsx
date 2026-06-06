@@ -24,8 +24,8 @@ const products = [
 
 const features = [
   {
-    title: "Free delivery over $40",
-    body: "Same-day delivery on orders above $40 within the city.",
+    title: "Free delivery over 3km",
+    body: "Same-day delivery on orders above $40 within the city. ",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <rect x="1" y="3" width="15" height="13" />
@@ -46,8 +46,8 @@ const features = [
     ),
   },
   {
-    title: "Easy returns",
-    body: "Not happy with an item? Return it at the door, no questions asked.",
+    title: "Cancel Order Before Dispatched",
+    body: "Changed your mind? Cancel your order easily before it leaves our store.",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
         <polyline points="1 4 1 10 7 10" />
@@ -131,9 +131,8 @@ export default function Home() {
               ].map((p, i) => (
                 <div
                   key={p.n}
-                  className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-border ${
-                    i % 2 === 1 ? "translate-y-6" : ""
-                  }`}
+                  className={`rounded-2xl bg-white p-5 shadow-sm ring-1 ring-border ${i % 2 === 1 ? "translate-y-6" : ""
+                    }`}
                 >
                   <div className="flex h-24 items-center justify-center rounded-xl bg-brand-light text-5xl">
                     {p.e}
@@ -285,9 +284,8 @@ export default function Home() {
               {["🍇", "🥦", "🍞", "🧀"].map((e, i) => (
                 <span
                   key={i}
-                  className={`flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 text-4xl backdrop-blur ${
-                    i % 2 === 1 ? "translate-y-4" : ""
-                  }`}
+                  className={`flex h-20 w-20 items-center justify-center rounded-2xl bg-white/10 text-4xl backdrop-blur ${i % 2 === 1 ? "translate-y-4" : ""
+                    }`}
                 >
                   {e}
                 </span>

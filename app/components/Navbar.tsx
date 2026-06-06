@@ -34,7 +34,7 @@ export default function Navbar() {
             </svg>
           </span>
           <span className="text-lg font-bold tracking-tight text-foreground">
-            SmartBasket
+            Smart Basket
           </span>
         </Link>
 
