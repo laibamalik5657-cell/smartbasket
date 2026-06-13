@@ -1,4 +1,23 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { signupFormSchema, type SignupFormInput, type RegisterInput } from "@/lib/validations/auth";
 
 const perks = [
   "20% off your first order",
@@ -8,6 +27,54 @@ const perks = [
 ];
 
 export default function SignupPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
+
+  const form = useForm<SignupFormInput>({
+    resolver: zodResolver(signupFormSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      agreed: false,
+    },
+  });
+
+  async function onSubmit(values: SignupFormInput) {
+    setLoading(true);
+    setMessage(null);
+
+    const payload: RegisterInput = {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.email,
+      password: values.password,
+    };
+
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setMessage({ type: "error", text: data.message || "Account creation failed." });
+      } else {
+        setMessage({ type: "success", text: "Account created successfully." });
+        router.push("/");
+      }
+    } catch {
+      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="bg-gradient-to-br from-brand-light via-white to-white">
       <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
@@ -41,7 +108,7 @@ export default function SignupPage() {
             </ul>
           </div>
           <p className="text-xs text-white/70">
-            “SmartBasket changed our weekly grocery run.” — Aisha, customer since 2024
+            &ldquo;SmartBasket changed our weekly grocery run.&rdquo; — Aisha, customer since 2024
           </p>
         </div>
 
@@ -70,59 +137,103 @@ export default function SignupPage() {
               <span className="h-px flex-1 bg-border" />
             </div>
 
-            <form className="space-y-4">
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label htmlFor="firstName" className="block text-sm font-medium">First name</label>
-                  <input
-                    id="firstName"
-                    type="text"
-                    placeholder="Maya"
-                    className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="firstName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>First name</FormLabel>
+                        <FormControl>
+                          <Input type="text" placeholder="Maya" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="lastName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Last name</FormLabel>
+                        <FormControl>
+                          <Input type="text" placeholder="Chen" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                 </div>
-                <div>
-                  <label htmlFor="lastName" className="block text-sm font-medium">Last name</label>
-                  <input
-                    id="lastName"
-                    type="text"
-                    placeholder="Chen"
-                    className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="you@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium">Password</label>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="At least 8 characters"
-                  className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="At least 8 characters" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-              </div>
-              <label className="flex items-start gap-2 text-sm text-muted">
-                <input type="checkbox" className="mt-0.5 h-4 w-4 rounded border-border accent-brand" />
-                <span>
-                  I agree to the <Link href="/" className="underline">Terms</Link> and{" "}
-                  <Link href="/" className="underline">Privacy Policy</Link>.
-                </span>
-              </label>
-              <button
-                type="submit"
-                className="w-full rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
-              >
-                Create account
-              </button>
-            </form>
+                <FormField
+                  control={form.control}
+                  name="agreed"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel className="text-sm font-normal text-muted">
+                          I agree to the <Link href="/" className="underline">Terms</Link> and{" "}
+                          <Link href="/" className="underline">Privacy Policy</Link>.
+                        </FormLabel>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+                {message && (
+                  <div
+                    className={`rounded-lg px-3 py-2 text-sm ${
+                      message.type === "error"
+                        ? "bg-red-50 text-red-600"
+                        : "bg-green-50 text-green-600"
+                    }`}
+                  >
+                    {message.text}
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
+                >
+                  {loading ? "Creating account..." : "Create account"}
+                </Button>
+              </form>
+            </Form>
 
             <p className="mt-6 text-center text-xs text-muted">
               We will send a verification email to confirm your address.

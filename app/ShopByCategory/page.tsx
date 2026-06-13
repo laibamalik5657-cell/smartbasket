@@ -86,7 +86,7 @@ export default function ShopByCategorySlider() {
               Shop by Category
             </h2>
             <p className="text-gray-500 mt-1 text-sm sm:text-base">
-              Explore Smart Basket's premium Pakistani products. Slide to view all!
+              Explore Smart Basket&apos;s premium Pakistani products. Slide to view all!
             </p>
           </div>
           
