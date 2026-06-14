@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="bg-gradient-to-br from-brand-light via-white to-white">
+    <div className="bg-linear-to-br from-brand-light via-white to-white">
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full rounded-3xl border border-border bg-white p-8 shadow-sm sm:p-10">
           <h1 className="text-2xl font-bold sm:text-3xl">Reset your password</h1>

@@ -59,7 +59,7 @@ export default function AboutPage() {
         </div>
 
         {/* Mission Statement Block */}
-        <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
+        <div className="bg-linear-to-br from-green-600 to-emerald-700 rounded-3xl p-8 sm:p-12 text-white shadow-xl relative overflow-hidden">
           <div className="relative z-10">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">Our Core Mission</h2>
             <p className="text-green-50 text-base sm:text-lg leading-relaxed mb-6 opacity-90">
