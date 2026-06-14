@@ -10,7 +10,6 @@ export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [agreed, setAgreed] = useState(false);
@@ -115,18 +114,6 @@ export default function SignupPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
-            <input
-              type="tel"
-              placeholder="03XX XXXXXXX"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
               className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
             />
           </div>
