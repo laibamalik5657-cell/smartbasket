@@ -8,7 +8,7 @@ This document is written for AI coding agents who need to understand, build, and
 - **Version:** `0.1.0`
 - **Type:** Next.js web application using the App Router
 - **Domain:** Online grocery store focused on fresh produce, pantry staples, dairy, bakery, and household items (content references Pakistani Rupee pricing and local brands).
-- **Scope:** This is a frontend prototype. Product, cart, and favourite data are hard-coded or kept in React component state. A lightweight in-memory auth API exists for login/register/forgot-password demo flows, but there is no real database, session handling, or checkout integration.
+- **Scope:** This is a frontend prototype. Product, cart, and favourite data are hard-coded or kept in React component state. Auth (login/register/forgot-password) uses a Mongoose-backed User collection in MongoDB, but sessions/JWTS/cookies and checkout integration are still demo-only.
 
 ## Technology Stack
 
@@ -21,6 +21,7 @@ This document is written for AI coding agents who need to understand, build, and
 - **Carousel:** [swiper](https://swiperjs.com) `^12.2.0` (declared but currently unused)
 - **UI Components:** [shadcn/ui](https://ui.shadcn.com) with `radix-ui`, `class-variance-authority`, `clsx`, `tailwind-merge`
 - **Forms & Validation:** [react-hook-form](https://react-hook-form.com) `^7.79.0`, [@hookform/resolvers](https://github.com/react-hook-form/resolvers) `^5.4.0`, [Zod](https://zod.dev) `^4.4.3`
+- **Database:** [MongoDB](https://www.mongodb.com) with [Mongoose](https://mongoosejs.com) `^9.7.0`
 - **Font:** `Geist` and `Geist_Mono` loaded via `next/font/google`
 - **Package Manager:** [pnpm](https://pnpm.io)
 - **Linter:** ESLint `^9` with `eslint-config-next` (core-web-vitals + typescript presets)
@@ -55,9 +56,12 @@ This document is written for AI coding agents who need to understand, build, and
 │       ├── form.tsx
 │       ├── input.tsx
 │       └── label.tsx
-├── lib/                    # Shared server-side utilities and validation
-│   ├── auth.ts             # In-memory user store and password helpers
+├── lib/                    # Shared server-side utilities, models, and validation
+│   ├── auth.ts             # Password helpers and user service backed by MongoDB
+│   ├── mongodb.ts          # Cached Mongoose connection helper
 │   ├── utils.ts            # Tailwind class merging
+│   ├── models/
+│   │   └── User.ts         # Mongoose User model
 │   └── validations/
 │       └── auth.ts         # Zod schemas for auth forms and API routes
 ├── public/                 # Static assets
@@ -89,8 +93,8 @@ This document is written for AI coding agents who need to understand, build, and
 | `/login` | `app/login/page.tsx` | Sign-in page (shadcn Form + react-hook-form + Zod, calls `/api/auth/login`) |
 | `/signup` | `app/signup/page.tsx` | Sign-up page (shadcn Form + react-hook-form + Zod, calls `/api/auth/register`) |
 | `/forgot-password` | `app/forgot-password/page.tsx` | Forgot-password page (shadcn Form + react-hook-form + Zod, calls `/api/auth/forgot-password`) |
-| `/api/auth/login` | `app/api/auth/login/route.ts` | POST: validates with Zod, returns user or 401 |
-| `/api/auth/register` | `app/api/auth/register/route.ts` | POST: validates with Zod, creates user or 409 |
+| `/api/auth/login` | `app/api/auth/login/route.ts` | POST: validates with Zod, queries MongoDB, returns user or 401 |
+| `/api/auth/register` | `app/api/auth/register/route.ts` | POST: validates with Zod, creates User document or returns 409 |
 | `/api/auth/forgot-password` | `app/api/auth/forgot-password/route.ts` | POST: validates with Zod, returns generic success message |
 
 ## Build and Development Commands
@@ -116,9 +120,23 @@ pnpm lint
 
 ### Important Build Notes
 
-- `pnpm build` currently produces **static prerendered pages** for every route because no dynamic data fetching is used.
+- `pnpm build` prerenders the marketing pages statically. Auth API routes are dynamic because they connect to MongoDB at runtime.
 - `next.config.ts` does **not** set `output: 'export'`, so `pnpm start` will run a Next.js production server rather than serving a fully static export.
-- The project declares `lucide-react` and `swiper` in `package.json`/`pnpm-lock.yaml`. On a fresh clone you must run `pnpm install` before building; otherwise the build will fail with `Module not found: Can't resolve 'lucide-react'`.
+- The project declares `lucide-react`, `swiper`, and `mongoose` in `package.json`/`pnpm-lock.yaml`. On a fresh clone you must run `pnpm install` before building; otherwise the build will fail with missing module errors.
+- A running MongoDB instance and a valid `MONGODB_URI` environment variable are required for the auth routes to work.
+
+## MongoDB Setup
+
+Auth data is stored in MongoDB via Mongoose.
+
+1. Create a MongoDB database (local, Docker, or Atlas).
+2. Add a `.env.local` file at the project root:
+
+   ```env
+   MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/smartbasket?retryWrites=true&w=majority
+   ```
+
+3. Run `pnpm dev`. The auth API routes connect on first request and seed a demo user (`demo@smartbasket.com` / `password123`) if one does not exist.
 
 ## Code Style and Conventions
 
@@ -177,16 +195,16 @@ The unescaped apostrophe in `app/ShopByCategory/page.tsx` has been fixed.
 
 ## Security Considerations
 
-- **Prototype authentication only:** `/api/auth/*` routes use an in-memory store with salted SHA-256 password hashes. There are no real sessions, JWTs, cookies, or email delivery. User data is lost on server restart.
-- **No backend:** There is no database or server-side session handling beyond the in-memory auth demo.
+- **Prototype authentication only:** `/api/auth/*` routes persist users in MongoDB using salted SHA-256 password hashes. There are still no real sessions, JWTs, cookies, or email delivery; treat auth as a demo.
+- **Database backend:** User data is stored in MongoDB via Mongoose. A unique index on `email` prevents duplicate accounts.
 - **External images:** The app loads images from third-party domains. A Content Security Policy should be added before production use.
-- **No input validation/sanitisation:** Contact, login, and signup forms do not currently validate or sanitise user input.
-- **Environment variables:** The codebase does not read any environment variables, so no `.env` files are required at this stage.
+- **Input validation:** Login and signup forms are validated with Zod on both client and API route. Contact form validation is still presentational.
+- **Environment variables:** The app reads `MONGODB_URI` from the environment. Create `.env.local` at the project root and keep it out of version control.
 
 ## Common Gotchas for Agents
 
 1. **Always run `pnpm install` first** on a fresh checkout; the lockfile is the source of truth.
-2. **Do not assume a backend exists.** Cart and favourites are purely local `useState`.
+2. **Auth requires MongoDB.** Set `MONGODB_URI` in `.env.local` or auth routes will throw at runtime. Cart and favourites are still purely local `useState`.
 3. **Watch for lint errors** caused by unescaped characters (`'`, `"`, `>`) in JSX text.
 4. **Prefer `next/image`** over `<img>` for new images, and update `next.config.ts` `images.remotePatterns` if new external hostnames are introduced.
 5. **Keep files small:** Avoid adding large base64 strings to source files; place images in `public/` or use external optimised URLs.

@@ -1,8 +1,13 @@
-import { findUserByEmail, seedDemoUser, verifyPassword } from "@/lib/auth";
+import {
+  findUserByEmail,
+  sanitizeUser,
+  seedDemoUser,
+  verifyPassword,
+} from "@/lib/auth";
 import { loginSchema } from "@/lib/validations/auth";
 
 export async function POST(request: Request) {
-  seedDemoUser();
+  await seedDemoUser();
 
   try {
     const body = await request.json();
@@ -17,7 +22,7 @@ export async function POST(request: Request) {
     }
 
     const { email, password } = result.data;
-    const user = findUserByEmail(email);
+    const user = await findUserByEmail(email);
 
     if (!user || !verifyPassword(user, password)) {
       return Response.json(
@@ -30,12 +35,7 @@ export async function POST(request: Request) {
       {
         success: true,
         message: "Signed in successfully.",
-        user: {
-          id: user.id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-        },
+        user: sanitizeUser(user),
       },
       { status: 200 }
     );

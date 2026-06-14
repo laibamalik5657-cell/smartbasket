@@ -2,18 +2,21 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useState, FormEvent } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
+  const [message, setMessage] = useState<{
+    type: "error" | "success";
+    text: string;
+  } | null>(null);
 
-  const form = useForm<LoginInput>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: { email: "", password: "" },
-  });
-
-  async function onSubmit(values: LoginInput) {
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setLoading(true);
     setMessage(null);
 
@@ -21,7 +24,7 @@ export default function LoginPage() {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -33,7 +36,10 @@ export default function LoginPage() {
         router.push("/");
       }
     } catch {
-      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+      setMessage({
+        type: "error",
+        text: "Something went wrong. Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -41,41 +47,23 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-
       <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-lg">
-
-        <h1 className="text-3xl font-bold text-center">
-          Welcome to SmartBasket
-        </h1>
+        <h1 className="text-3xl font-bold text-center">Welcome to SmartBasket</h1>
 
         <p className="mt-2 text-center text-gray-500">
           Sign in to continue shopping
         </p>
 
-        <form className="mt-8 space-y-4">
-
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Full Name
-            </label>
-
-            <input
-              type="text"
-              placeholder="Enter your name"
-              className="w-full rounded-lg border p-3 outline-none focus:border-green-600"
-            />
-          </div>
-
+        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Email
-            </label>
-
+            <label className="block text-sm font-medium mb-1">Email</label>
             <input
               type="email"
               placeholder="you@example.com"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border p-3 outline-none focus:border-green-600"
             />
           </div>
@@ -83,10 +71,7 @@ export default function LoginPage() {
           {/* Password */}
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-sm font-medium">
-                Password
-              </label>
-
+              <label className="text-sm font-medium">Password</label>
               <Link
                 href="/forgot-password"
                 className="text-sm text-green-600 hover:underline"
@@ -94,22 +79,37 @@ export default function LoginPage() {
                 Forgot Password?
               </Link>
             </div>
-
             <input
               type="password"
               placeholder="••••••••"
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border p-3 outline-none focus:border-green-600"
             />
           </div>
 
+          {message && (
+            <div
+              className={`rounded-lg px-3 py-2 text-sm ${
+                message.type === "error"
+                  ? "bg-red-50 text-red-600"
+                  : "bg-green-50 text-green-600"
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
           {/* Sign In Button */}
           <button
             type="submit"
-            className="w-full rounded-lg bg-green-600 py-3 font-medium text-white hover:bg-green-700"
+            disabled={loading}
+            className="w-full rounded-lg bg-green-600 py-3 font-medium text-white hover:bg-green-700 disabled:opacity-60"
           >
-            Sign In
+            {loading ? "Signing in..." : "Sign In"}
           </button>
-
         </form>
 
         {/* Divider */}
@@ -130,12 +130,11 @@ export default function LoginPage() {
             width={20}
             height={20}
           />
-
           Continue with Google
         </button>
 
         <p className="mt-6 text-center text-sm text-gray-500">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link
             href="/signup"
             className="font-medium text-green-600 hover:underline"
@@ -143,9 +142,7 @@ export default function LoginPage() {
             Create Account
           </Link>
         </p>
-
       </div>
-
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { createUser, findUserByEmail, seedDemoUser } from "@/lib/auth";
 import { registerSchema } from "@/lib/validations/auth";
 
 export async function POST(request: Request) {
-  seedDemoUser();
+  await seedDemoUser();
 
   try {
     const body = await request.json();
@@ -19,14 +19,14 @@ export async function POST(request: Request) {
     const { firstName, lastName, email, password } = result.data;
     const normalizedEmail = email.toLowerCase();
 
-    if (findUserByEmail(normalizedEmail)) {
+    if (await findUserByEmail(normalizedEmail)) {
       return Response.json(
         { success: false, message: "An account with this email already exists." },
         { status: 409 }
       );
     }
 
-    const user = createUser(firstName, lastName, normalizedEmail, password);
+    const user = await createUser(firstName, lastName, normalizedEmail, password);
 
     return Response.json(
       {
