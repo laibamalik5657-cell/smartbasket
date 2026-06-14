@@ -1,5 +1,5 @@
 import Link from "next/link";
-import CategorySlider from "@/components/CategorySlider";
+import CategorySlider from "./_components/category-slider";
 import { seedCategories } from "@/lib/seed/categories";
 import { Category, ICategory } from "@/lib/models/Category";
 
@@ -77,7 +77,7 @@ export default async function Home() {
   return (
     <div>
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-brand-light via-white to-brand-light/40">
+      <section className="relative overflow-hidden bg-linear-to-br from-brand-light via-white to-brand-light/40">
         <div className="mx-auto grid w-full max-w-7xl items-center gap-10 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-28">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-semibold text-brand shadow-sm ring-1 ring-brand/20">
