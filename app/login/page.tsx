@@ -1,109 +1,114 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function LoginPage() {
   return (
-    <div className="bg-gradient-to-br from-brand-light via-white to-white">
-      <div className="mx-auto grid w-full max-w-6xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
-        <div className="hidden flex-col justify-between rounded-3xl bg-brand p-10 text-white lg:flex">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
+
+      <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-lg">
+
+        <h1 className="text-3xl font-bold text-center">
+          Welcome to SmartBasket
+        </h1>
+
+        <p className="mt-2 text-center text-gray-500">
+          Sign in to continue shopping
+        </p>
+
+        <form className="mt-8 space-y-4">
+
+          {/* Name */}
           <div>
-            <Link href="/" className="flex items-center gap-2 text-white">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/15">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                  <path d="M3 6h18l-2 13H5L3 6z" />
-                  <path d="M16 10a4 4 0 0 1-8 0" />
-                </svg>
-              </span>
-              <span className="text-lg font-bold">SmartBasket</span>
-            </Link>
-            <h2 className="mt-12 text-3xl font-bold leading-tight">
-              Welcome back. Your basket is waiting.
-            </h2>
-            <p className="mt-3 max-w-sm text-white/85">
-              Pick up where you left off — your favourites, addresses, and saved
-              orders are all one click away.
-            </p>
+            <label className="block text-sm font-medium mb-1">
+              Full Name
+            </label>
+
+            <input
+              type="text"
+              placeholder="Enter your name"
+              className="w-full rounded-lg border p-3 outline-none focus:border-green-600"
+            />
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            {["🍓", "🥑", "🥖", "🥕", "🧀", "🍇"].map((e, i) => (
-              <span
-                key={i}
-                className="flex h-16 items-center justify-center rounded-xl bg-white/10 text-3xl backdrop-blur"
-              >
-                {e}
-              </span>
-            ))}
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Email
+            </label>
+
+            <input
+              type="email"
+              placeholder="you@example.com"
+              className="w-full rounded-lg border p-3 outline-none focus:border-green-600"
+            />
           </div>
-        </div>
 
-        <div className="flex items-center">
-          <div className="w-full rounded-3xl border border-border bg-white p-8 shadow-sm sm:p-10">
-            <h1 className="text-2xl font-bold sm:text-3xl">Sign in</h1>
-            <p className="mt-1 text-sm text-muted">
-              New here?{" "}
-              <Link href="/signup" className="font-medium text-brand hover:underline">
-                Create an account
-              </Link>
-            </p>
-
-            <div className="mt-6 grid gap-2 sm:grid-cols-2">
-              <button className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:border-brand hover:text-brand">
-                <span>🔍</span> Continue with Google
-              </button>
-              <button className="flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-medium transition-colors hover:border-brand hover:text-brand">
-                <span></span> Continue with Apple
-              </button>
-            </div>
-
-            <div className="my-6 flex items-center gap-3 text-xs text-muted">
-              <span className="h-px flex-1 bg-border" />
-              or sign in with email
-              <span className="h-px flex-1 bg-border" />
-            </div>
-
-            <form className="space-y-4">
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
-                />
-              </div>
-              <div>
-                <div className="flex items-center justify-between">
-                  <label htmlFor="password" className="block text-sm font-medium">Password</label>
-                  <Link href="/login" className="text-xs font-medium text-brand hover:underline">
-                    Forgot password?
-                  </Link>
-                </div>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  className="mt-1 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm outline-none focus:border-brand"
-                />
-              </div>
-              <label className="flex items-center gap-2 text-sm text-muted">
-                <input type="checkbox" className="h-4 w-4 rounded border-border accent-brand" />
-                Remember me on this device
+          {/* Password */}
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-sm font-medium">
+                Password
               </label>
-              <button
-                type="submit"
-                className="w-full rounded-full bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-dark"
-              >
-                Sign in
-              </button>
-            </form>
 
-            <p className="mt-6 text-center text-xs text-muted">
-              By signing in you agree to our{" "}
-              <Link href="/" className="underline">Terms</Link> and{" "}
-              <Link href="/" className="underline">Privacy Policy</Link>.
-            </p>
+              <Link
+                href="/forgot-password"
+                className="text-sm text-green-600 hover:underline"
+              >
+                Forgot Password?
+              </Link>
+            </div>
+
+            <input
+              type="password"
+              placeholder="••••••••"
+              className="w-full rounded-lg border p-3 outline-none focus:border-green-600"
+            />
           </div>
+
+          {/* Sign In Button */}
+          <button
+            type="submit"
+            className="w-full rounded-lg bg-green-600 py-3 font-medium text-white hover:bg-green-700"
+          >
+            Sign In
+          </button>
+
+        </form>
+
+        {/* Divider */}
+        <div className="my-6 flex items-center gap-3">
+          <span className="h-px flex-1 bg-gray-300" />
+          <span className="text-sm text-gray-500">OR</span>
+          <span className="h-px flex-1 bg-gray-300" />
         </div>
+
+        {/* Google Login */}
+        <button
+          type="button"
+          className="flex w-full items-center justify-center gap-3 rounded-lg border p-3 font-medium hover:bg-gray-50"
+        >
+          <Image
+            src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
+            alt="Google"
+            width={20}
+            height={20}
+          />
+
+          Continue with Google
+        </button>
+
+        <p className="mt-6 text-center text-sm text-gray-500">
+          Don't have an account?{" "}
+          <Link
+            href="/signup"
+            className="font-medium text-green-600 hover:underline"
+          >
+            Create Account
+          </Link>
+        </p>
+
       </div>
+
     </div>
   );
 }
