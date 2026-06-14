@@ -7,7 +7,8 @@ import { useState, FormEvent } from "react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [fullName, setFullName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -19,17 +20,14 @@ export default function SignupPage() {
     text: string;
   } | null>(null);
 
-  function splitName(name: string): { firstName: string; lastName: string } {
-    const parts = name.trim().split(/\s+/);
-    return {
-      firstName: parts[0] || "",
-      lastName: parts.slice(1).join(" ") || "",
-    };
-  }
-
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setMessage(null);
+
+    if (!firstName.trim()) {
+      setMessage({ type: "error", text: "Please enter your first name." });
+      return;
+    }
 
     if (password !== confirmPassword) {
       setMessage({ type: "error", text: "Passwords do not match." });
@@ -38,13 +36,6 @@ export default function SignupPage() {
 
     if (!agreed) {
       setMessage({ type: "error", text: "You must agree to the terms." });
-      return;
-    }
-
-    const { firstName, lastName } = splitName(fullName);
-
-    if (!firstName) {
-      setMessage({ type: "error", text: "Please enter your full name." });
       return;
     }
 
@@ -88,15 +79,27 @@ export default function SignupPage() {
         </p>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {/* Full Name */}
+          {/* First Name */}
           <div>
-            <label className="block text-sm font-medium mb-1">Full Name</label>
+            <label className="block text-sm font-medium mb-1">First Name</label>
             <input
               type="text"
-              placeholder="Enter your full name"
+              placeholder="Enter your first name"
               required
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
+            />
+          </div>
+
+          {/* Last Name */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Last Name</label>
+            <input
+              type="text"
+              placeholder="Enter your last name"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
               className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
             />
           </div>
