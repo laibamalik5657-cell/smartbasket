@@ -48,6 +48,7 @@ This document is written for AI coding agents who need to understand, build, and
 │   ├── layout.tsx          # Root layout: fonts, metadata, Navbar, Footer
 │   └── page.tsx            # Home / landing page
 ├── components/             # Shared React components
+│   ├── CategorySlider.tsx  # Client category slider used on the home page
 │   ├── Footer.tsx
 │   ├── Navbar.tsx
 │   └── ui/                 # shadcn/ui components
@@ -61,7 +62,10 @@ This document is written for AI coding agents who need to understand, build, and
 │   ├── mongodb.ts          # Cached Mongoose connection helper
 │   ├── utils.ts            # Tailwind class merging
 │   ├── models/
+│   │   ├── Category.ts     # Mongoose Category model
 │   │   └── User.ts         # Mongoose User model
+│   ├── seed/
+│   │   └── categories.ts   # Default categories and seed helper
 │   └── validations/
 │       └── auth.ts         # Zod schemas for auth forms and API routes
 ├── public/                 # Static assets
@@ -83,7 +87,7 @@ This document is written for AI coding agents who need to understand, build, and
 
 | Route | File | Notes |
 |-------|------|-------|
-| `/` | `app/page.tsx` | Home: hero, category slider, featured products, value props, coupon CTA |
+| `/` | `app/page.tsx` | Home: hero, category slider (fetched from MongoDB), featured products, value props, coupon CTA |
 | `/about` | `app/about/page.tsx` | Marketing about page |
 | `/contact` | `app/contact/page.tsx` | Contact form + FAQ (presentational) |
 | `/cart` | `app/cart/page.tsx` | Shopping cart with local state |
