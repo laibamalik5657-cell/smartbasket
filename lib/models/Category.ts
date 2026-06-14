@@ -3,10 +3,11 @@ import mongoose, { Schema, model, models } from "mongoose";
 export interface ICategory {
   _id: mongoose.Types.ObjectId;
   name: string;
-  emoji: string;
+  image: string;
   tint: string;
   slug: string;
   order: number;
+  count: string;
   createdAt: Date;
 }
 
@@ -18,9 +19,9 @@ const CategorySchema = new Schema<ICategory>(
       unique: true,
       trim: true,
     },
-    emoji: {
+    image: {
       type: String,
-      required: [true, "Category emoji/icon path is required."],
+      required: [true, "Category image URL is required."],
       trim: true,
     },
     tint: {
@@ -38,6 +39,10 @@ const CategorySchema = new Schema<ICategory>(
     order: {
       type: Number,
       default: 0,
+    },
+    count: {
+      type: String,
+      default: "",
     },
   },
   {

@@ -68,10 +68,11 @@ export default async function Home() {
   const categories = categoryDocs.map((c) => ({
     _id: c._id.toString(),
     name: c.name,
-    emoji: c.emoji,
+    image: c.image,
     tint: c.tint,
     slug: c.slug,
     order: c.order,
+    count: c.count,
   }));
 
   return (

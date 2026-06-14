@@ -100,6 +100,7 @@ This document is written for AI coding agents who need to understand, build, and
 | `/api/auth/login` | `app/api/auth/login/route.ts` | POST: validates with Zod, queries MongoDB, returns user or 401 |
 | `/api/auth/register` | `app/api/auth/register/route.ts` | POST: validates with Zod, creates User document or returns 409 |
 | `/api/auth/forgot-password` | `app/api/auth/forgot-password/route.ts` | POST: validates with Zod, returns generic success message |
+| `/api/seed/categories` | `app/api/seed/categories/route.ts` | POST: drops and re-seeds the Category collection |
 
 ## Build and Development Commands
 
