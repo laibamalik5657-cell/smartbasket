@@ -3,38 +3,8 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { User, IUser } from "@/models/User";
 import { loginSchema } from "@/schema";
 
-const SALT_ROUNDS = 12;
-
-function sanitizeUser(user: IUser) {
-  return {
-    id: user._id.toString(),
-    firstName: user.firstName,
-    lastName: user.lastName,
-    email: user.email,
-    createdAt:
-      user.createdAt instanceof Date
-        ? user.createdAt.toISOString()
-        : new Date(user.createdAt).toISOString(),
-  };
-}
-
-// Ensure the demo account exists so the demo credentials always work.
-async function seedDemoUser() {
-  const demoEmail = "demo@smartbasket.com";
-  const existing = await User.findOne({ email: demoEmail }).lean<IUser>();
-  if (!existing) {
-    await User.create({
-      firstName: "Demo",
-      lastName: "User",
-      email: demoEmail,
-      passwordHash: await bcrypt.hash("password123", SALT_ROUNDS),
-    });
-  }
-}
-
 export async function POST(request: Request) {
   await connectToDatabase();
-  await seedDemoUser();
 
   try {
     const body = await request.json();
@@ -64,7 +34,16 @@ export async function POST(request: Request) {
       {
         success: true,
         message: "Signed in successfully.",
-        user: sanitizeUser(user),
+        user: {
+          id: user._id.toString(),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          createdAt:
+            user.createdAt instanceof Date
+              ? user.createdAt.toISOString()
+              : new Date(user.createdAt).toISOString(),
+        },
       },
       { status: 200 },
     );
