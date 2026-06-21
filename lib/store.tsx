@@ -35,9 +35,18 @@ export interface Order {
   createdAt: string;
 }
 
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  createdAt?: string;
+}
+
 const CART_KEY = "smartbasket:cart";
 const FAV_KEY = "smartbasket:favorites";
 const ORDERS_KEY = "smartbasket:orders";
+const USER_KEY = "smartbasket:user";
 
 function readRaw<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -62,11 +71,13 @@ const EMPTY_ORDERS: Order[] = [];
 let cartCache: CartLine[] = EMPTY_CART;
 let favCache: Product[] = EMPTY_FAV;
 let ordersCache: Order[] = EMPTY_ORDERS;
+let userCache: User | null = null;
 
 function loadCaches() {
   cartCache = readRaw<CartLine[]>(CART_KEY, EMPTY_CART);
   favCache = readRaw<Product[]>(FAV_KEY, EMPTY_FAV);
   ordersCache = readRaw<Order[]>(ORDERS_KEY, EMPTY_ORDERS);
+  userCache = readRaw<User | null>(USER_KEY, null);
 }
 
 if (typeof window !== "undefined") loadCaches();
@@ -113,6 +124,12 @@ function setOrders(next: Order[]) {
   emit();
 }
 
+function setUser(next: User | null) {
+  userCache = next;
+  persist(USER_KEY, next);
+  emit();
+}
+
 /* Kept so existing <StoreProvider> in the layout keeps working — the store
  * itself is module-level, so this is just a passthrough. */
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -135,6 +152,19 @@ export function useStore() {
     () => ordersCache,
     () => EMPTY_ORDERS,
   );
+  const user = useSyncExternalStore(
+    subscribe,
+    () => userCache,
+    () => null,
+  );
+
+  const setUserCallback = useCallback((next: User | null) => {
+    setUser(next);
+  }, []);
+
+  const clearUser = useCallback(() => setUser(null), []);
+
+  const isAuthenticated = !!user;
 
   const addToCart = useCallback((product: Product, qty = 1) => {
     const existing = cartCache.find((i) => i.id === product.id);
@@ -216,6 +246,8 @@ export function useStore() {
     cart,
     favorites,
     orders,
+    user,
+    isAuthenticated,
     cartCount,
     favCount,
     addToCart,
@@ -226,5 +258,7 @@ export function useStore() {
     isFavourite,
     placeOrder,
     getOrder,
+    setUser: setUserCallback,
+    clearUser,
   };
 }
