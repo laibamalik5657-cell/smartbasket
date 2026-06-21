@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
 
-import api from "@/lib/axios";
 import { loginSchema, type LoginInput } from "@/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,9 +19,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import apiClient from "@/lib/axios";
+import { useStore } from "@/lib/store";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useStore();
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
@@ -36,7 +38,10 @@ export default function LoginPage() {
   async function onSubmit(values: LoginInput) {
     setMessage(null);
     try {
-      await api.post("/auth/login", values);
+      const response = await apiClient.post("/auth/login", values);
+      if (response.data?.user) {
+        setUser(response.data.user);
+      }
       setMessage({ type: "success", text: "Signed in successfully." });
       router.push("/");
     } catch (err) {

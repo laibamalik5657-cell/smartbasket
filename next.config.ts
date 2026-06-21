@@ -18,6 +18,18 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'pictures.grocerapps.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'qne.com.pk',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };

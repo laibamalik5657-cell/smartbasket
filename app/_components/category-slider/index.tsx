@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 
 export type Category = {
@@ -41,7 +42,7 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
             Shop by Category
           </h2>
           <p className="text-gray-500 text-sm mt-1">
-            Everything your kitchen needs, organised. Slide to view all!
+            Everything your kitchen needs, organized. Slide to view all!
           </p>
         </div>
 
@@ -75,12 +76,14 @@ export default function CategorySlider({ categories }: CategorySliderProps) {
             className="flex-shrink-0 w-[220px] sm:w-[260px] group cursor-pointer bg-white rounded-3xl border border-gray-100 shadow-sm p-5 flex flex-col items-center text-center justify-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
           >
             <div
-              className={`w-36 h-36 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mb-4 ${category.tint} overflow-hidden transition-transform group-hover:scale-105 shadow-inner`}
+              className={`relative w-36 h-36 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mb-4 ${category.tint} overflow-hidden transition-transform group-hover:scale-105 shadow-inner`}
             >
-              <img
+              <Image
                 src={category.image}
                 alt={category.name}
-                className="w-full h-full object-cover"
+                fill
+                sizes="(max-width: 640px) 144px, 160px"
+                className="object-cover"
                 loading="lazy"
               />
             </div>

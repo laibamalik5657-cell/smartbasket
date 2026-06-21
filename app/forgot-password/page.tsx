@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/schema";
+import apiClient from "@/lib/axios";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -33,7 +34,7 @@ export default function ForgotPasswordPage() {
     setMessage(null);
 
     try {
-      const { data } = await api.post("/auth/forgot-password", values);
+      const { data } = await apiClient.post("/auth/forgot-password", values);
       setMessage({ type: "success", text: data.message });
       form.reset();
     } catch (err) {

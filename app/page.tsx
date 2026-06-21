@@ -125,13 +125,13 @@ export default async function Home() {
               <br />
               <span className="text-brand">delivered in minutes.</span>
             </h1>
-            <p className="mt-5 max-w-lg text-lg text-muted">
+            <p className="mt-5 max-w-lg text-lg">
               Stock your kitchen with farm-fresh produce, dairy, bakery and
               pantry staples — handpicked daily and delivered to your door.
             </p>
 
             <form className="mt-8 flex max-w-md items-center gap-2 rounded-full bg-white p-1.5 shadow-sm ring-1 ring-border focus-within:ring-brand">
-              <span className="pl-3 text-muted">
+              <span className="pl-3">
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"
@@ -158,7 +158,7 @@ export default async function Home() {
               </button>
             </form>
 
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-muted">
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
               <div className="flex items-center gap-2">
                 <span className="text-brand">✓</span> 10,000+ products
               </div>
@@ -219,7 +219,7 @@ export default async function Home() {
           <div className="flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold sm:text-3xl">Featured today</h2>
-              <p className="mt-1 text-sm text-muted">
+              <p className="mt-1 text-sm">
                 Handpicked picks from our farmers and bakers.
               </p>
             </div>
@@ -251,7 +251,7 @@ export default async function Home() {
                 {f.icon}
               </div>
               <h3 className="mt-4 text-base font-semibold">{f.title}</h3>
-              <p className="mt-1 text-sm text-muted">{f.body}</p>
+              <p className="mt-1 text-sm">{f.body}</p>
             </div>
           ))}
         </div>
