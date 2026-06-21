@@ -29,32 +29,46 @@ export default function CartPage() {
     setCustomer((prev) => ({ ...prev, [field]: value }));
 
   const handlePlaceOrder = () => {
+    const trimmed = {
+      name: customer.name.trim(),
+      phone: customer.phone.trim(),
+      city: customer.city.trim(),
+      area: customer.area.trim(),
+      address: customer.address.trim(),
+    };
+
     if (
-      !customer.name.trim() ||
-      !customer.phone.trim() ||
-      !customer.city.trim() ||
-      !customer.area.trim() ||
-      !customer.address.trim()
+      !trimmed.name ||
+      !trimmed.phone ||
+      !trimmed.city ||
+      !trimmed.area ||
+      !trimmed.address
     ) {
       setError("Please fill in all delivery details.");
       return;
     }
+
+    if (!/^\d{10,}$/.test(trimmed.phone)) {
+      setError("Please enter a valid phone number (at least 10 digits).");
+      return;
+    }
+
     setError("");
-    const order = placeOrder({ payment, customer });
+    const order = placeOrder({ payment, customer: trimmed });
     router.push(`/order-confirmation?id=${order.id}`);
   };
 
   /* EMPTY CART */
   if (cart.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="text-center bg-white rounded-2xl shadow-sm border border-gray-100 p-12 max-w-md w-full">
+      <div className="min-h-screen bg-surface flex items-center justify-center px-4">
+        <div className="text-center bg-white rounded-2xl shadow-sm border border-border p-12 max-w-md w-full">
           <p className="text-5xl mb-4">🛒</p>
-          <h1 className="text-2xl font-bold text-gray-900">Your cart is empty</h1>
-          <p className="mt-2 text-gray-500">Add some fresh groceries to get started.</p>
+          <h1 className="text-2xl font-bold text-foreground">Your cart is empty</h1>
+          <p className="mt-2 text-muted-foreground">Add some fresh groceries to get started.</p>
           <Link
             href="/items/see-more"
-            className="mt-6 inline-block rounded-lg bg-green-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-green-700"
+            className="mt-6 inline-block rounded-lg bg-brand px-5 py-2.5 text-sm font-medium text-white hover:bg-brand-dark"
           >
             Browse products
           </Link>
@@ -66,7 +80,7 @@ export default function CartPage() {
   /* CHECKOUT */
   if (checkout) {
     return (
-      <div className="min-h-screen bg-gray-100 py-8">
+      <div className="min-h-screen bg-surface py-8">
         <div className="max-w-6xl mx-auto px-4">
           <h1 className="text-3xl font-bold mb-6">Checkout</h1>
 
@@ -82,35 +96,36 @@ export default function CartPage() {
                     placeholder="Full Name"
                     value={customer.name}
                     onChange={(e) => setField("name", e.target.value)}
-                    className="border rounded-lg p-3 outline-none focus:border-green-600"
+                    className="border rounded-lg p-3 outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   />
                   <input
-                    type="text"
+                    type="tel"
+                    inputMode="numeric"
                     placeholder="Phone Number"
                     value={customer.phone}
                     onChange={(e) => setField("phone", e.target.value)}
-                    className="border rounded-lg p-3 outline-none focus:border-green-600"
+                    className="border rounded-lg p-3 outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   />
                   <input
                     type="text"
                     placeholder="City"
                     value={customer.city}
                     onChange={(e) => setField("city", e.target.value)}
-                    className="border rounded-lg p-3 outline-none focus:border-green-600"
+                    className="border rounded-lg p-3 outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   />
                   <input
                     type="text"
                     placeholder="Area"
                     value={customer.area}
                     onChange={(e) => setField("area", e.target.value)}
-                    className="border rounded-lg p-3 outline-none focus:border-green-600"
+                    className="border rounded-lg p-3 outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   />
                 </div>
                 <textarea
                   placeholder="House No, Street, Landmark"
                   value={customer.address}
                   onChange={(e) => setField("address", e.target.value)}
-                  className="w-full border rounded-lg p-3 mt-4 outline-none focus:border-green-600"
+                  className="w-full border rounded-lg p-3 mt-4 outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   rows={4}
                 />
               </div>
@@ -119,10 +134,10 @@ export default function CartPage() {
               <div className="bg-white p-6 rounded-xl shadow">
                 <h2 className="text-xl font-semibold mb-4">Payment Method</h2>
                 <div className="space-y-3">
-                  <label className="flex items-center justify-between border rounded-lg p-4 cursor-pointer hover:border-green-500">
+                  <label className="flex items-center justify-between border rounded-lg p-4 cursor-pointer hover:border-brand">
                     <div>
                       <p className="font-medium">Cash on Delivery</p>
-                      <p className="text-sm text-gray-500">Pay when your order arrives</p>
+                      <p className="text-sm text-muted-foreground">Pay when your order arrives</p>
                     </div>
                     <input
                       type="radio"
@@ -132,10 +147,10 @@ export default function CartPage() {
                       onChange={(e) => setPayment(e.target.value)}
                     />
                   </label>
-                  <label className="flex items-center justify-between border rounded-lg p-4 cursor-pointer hover:border-green-500">
+                  <label className="flex items-center justify-between border rounded-lg p-4 opacity-60 cursor-not-allowed">
                     <div>
                       <p className="font-medium">Online Payment</p>
-                      <p className="text-sm text-gray-500">Upload proof</p>
+                      <p className="text-sm text-muted-foreground">Coming soon</p>
                     </div>
                     <input
                       type="radio"
@@ -143,6 +158,7 @@ export default function CartPage() {
                       value="online"
                       checked={payment === "online"}
                       onChange={(e) => setPayment(e.target.value)}
+                      disabled
                     />
                   </label>
                 </div>
@@ -169,17 +185,17 @@ export default function CartPage() {
                   </div>
                 </div>
 
-                {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+                {error && <p className="mt-4 text-sm text-red-600" role="alert">{error}</p>}
 
                 <button
                   onClick={handlePlaceOrder}
-                  className="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-medium"
+                  className="w-full mt-6 bg-brand hover:bg-brand-dark text-white py-3 rounded-lg font-medium"
                 >
                   Place Order
                 </button>
                 <button
                   onClick={() => setCheckout(false)}
-                  className="w-full mt-2 text-gray-500 py-2 text-sm hover:text-gray-700"
+                  className="w-full mt-2 text-muted-foreground py-2 text-sm hover:text-foreground"
                 >
                   ← Back to cart
                 </button>
@@ -193,7 +209,7 @@ export default function CartPage() {
 
   /* CART LIST */
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-surface p-6">
       <h1 className="text-2xl font-bold mb-6">🛒 Grocery Cart</h1>
 
       <div className="bg-white rounded-lg p-4">
@@ -209,8 +225,8 @@ export default function CartPage() {
             />
 
             <div className="flex-1">
-              <h2 className="font-semibold text-gray-900">{item.name}</h2>
-              <p className="text-sm text-gray-500">
+              <h2 className="font-semibold text-foreground">{item.name}</h2>
+              <p className="text-sm text-muted-foreground">
                 {[item.category, item.unit].filter(Boolean).join(" • ")}
               </p>
               <p className="text-sm mt-1">
@@ -253,7 +269,7 @@ export default function CartPage() {
         <p className="font-bold text-lg mt-2">Total: Rs {total}</p>
 
         <button
-          className="w-full mt-4 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700"
+          className="w-full mt-4 bg-brand text-white py-2 rounded-lg hover:bg-brand-dark"
           onClick={() => setCheckout(true)}
         >
           Checkout

@@ -21,6 +21,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import apiClient from "@/lib/axios";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function SignupPage() {
   async function onSubmit(values: SignupFormInput) {
     setMessage(null);
     try {
-      await api.post("/auth/register", {
+      await apiClient.post("/auth/register", {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
@@ -71,7 +72,10 @@ export default function SignupPage() {
         </p>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mt-6 space-y-4"
+          >
             <FormField
               control={form.control}
               name="firstName"
@@ -107,7 +111,11 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Email Address</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -121,7 +129,11 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Create password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Create password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -135,7 +147,11 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="Confirm password" {...field} />
+                    <Input
+                      type="password"
+                      placeholder="Confirm password"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -210,7 +226,10 @@ export default function SignupPage() {
 
         <p className="mt-5 text-center text-sm text-gray-500">
           Already have an account?{" "}
-          <Link href="/login" className="font-medium text-green-600 hover:underline">
+          <Link
+            href="/login"
+            className="font-medium text-green-600 hover:underline"
+          >
             Sign In
           </Link>
         </p>

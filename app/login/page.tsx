@@ -20,6 +20,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import apiClient from "@/lib/axios";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -36,7 +37,7 @@ export default function LoginPage() {
   async function onSubmit(values: LoginInput) {
     setMessage(null);
     try {
-      await api.post("/auth/login", values);
+      await apiClient.post("/auth/login", values);
       setMessage({ type: "success", text: "Signed in successfully." });
       router.push("/");
     } catch (err) {

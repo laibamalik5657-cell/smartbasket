@@ -27,6 +27,8 @@ export interface OrderCustomer {
 export interface Order {
   id: string;
   items: CartLine[];
+  subtotal: number;
+  shipping: number;
   total: number;
   payment: string;
   customer: OrderCustomer;
@@ -182,10 +184,14 @@ export function useStore() {
       payment: string;
       customer: OrderCustomer;
     }): Order => {
-      const total = cartCache.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      const subtotal = cartCache.reduce((sum, i) => sum + i.price * i.quantity, 0);
+      const shipping = subtotal > 500 || subtotal === 0 ? 0 : 50;
+      const total = subtotal + shipping;
       const order: Order = {
         id: `ORD-${Date.now()}`,
         items: cartCache,
+        subtotal,
+        shipping,
         total,
         payment,
         customer,
