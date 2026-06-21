@@ -20,9 +20,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import apiClient from "@/lib/axios";
+import { useStore } from "@/lib/store";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useStore();
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
@@ -36,7 +38,10 @@ export default function LoginPage() {
   async function onSubmit(values: LoginInput) {
     setMessage(null);
     try {
-      await apiClient.post("/auth/login", values);
+      const response = await apiClient.post("/auth/login", values);
+      if (response.data?.user) {
+        setUser(response.data.user);
+      }
       setMessage({ type: "success", text: "Signed in successfully." });
       router.push("/");
     } catch (err) {
