@@ -16,13 +16,17 @@ pnpm start          # production server (after build)
 pnpm lint           # ESLint (eslint-config-next: core-web-vitals + typescript)
 ```
 
-There is **no test framework** configured — validation is `pnpm build` + `pnpm lint`. `pnpm lint` is expected to report ~3 warnings about native `<img>` vs `next/image` (not errors).
+There is **no test framework** configured — validation is `pnpm build` + `pnpm lint`. `pnpm lint` is expected to report a couple of warnings about native `<img>` vs `next/image` (warnings, not errors).
+
+This repo's ESLint treats `react-hooks/set-state-in-effect` as an **error**, which forbids the common "load from `localStorage` in a `useEffect`" / mounted-flag pattern. That is why `lib/store.tsx` reads `localStorage` through `useSyncExternalStore` instead — follow that pattern for any new client-persisted state.
 
 ## Architecture
 
 Next.js **16 App Router** + React 19 + TypeScript (strict), Tailwind CSS **v4** (config via `@theme inline` in `app/globals.css`, no `tailwind.config.js`), shadcn/ui on radix-ui. Path alias `@/*` → repo root.
 
-This is a **frontend grocery e-commerce prototype**. Cart and favorites are hard-coded / `useState` only — there is **no global state store and no persistence** for them. Only auth and categories touch the database.
+This is a **frontend grocery e-commerce prototype**. Product data is hard-coded. **Cart, favourites, and placed orders persist client-side in `localStorage`** via a shared store at `lib/store.tsx` — a module-level store read through `useSyncExternalStore` and exposed by the `useStore()` hook. Use `useStore()` for cart/favourites/orders state; **do not** reintroduce per-page `useState`. `StoreProvider` wraps the app in `app/layout.tsx` (it's a passthrough — the store is module-level). Only auth and categories touch the **database**; orders never reach a backend.
+
+**Client→API calls go through `lib/axios.ts`** (a shared axios instance with `baseURL: "/api"`), imported as `@/lib/axios`. Do **not** use `fetch` for API calls.
 
 **Use Mongoose (decided):** the backend talks to MongoDB through **Mongoose**, not the native `mongodb` driver. Keep it that way — schemas, the `email` unique index, the `globalThis` connection cache, and model re-registration guards are all Mongoose patterns already wired in correctly. Mongoose handles data shape at the DB layer; **Zod** handles request validation in API routes. Only reconsider the native driver if the backend grows enough that the schema layer becomes a burden.
 
