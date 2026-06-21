@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { useStore } from "@/lib/store";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -13,39 +14,7 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const router = useRouter();
-  
-  // 🟢 State for dynamic favorites counter
-  const [favouriteCount, setfavouriteCount] = useState<number>(0);
-
-  // 🟢 LocalStorage se direct count read karne ka function
-  const updatefavouriteCount = () => {
-    if (typeof window !== "undefined") {
-      const savedfavourite = localStorage.getItem("smart_basket_favorite");
-      if (savedfavourite) {
-        try {
-          const parsed = JSON.parse(savedfavourite);
-          setfavouriteCount(parsed.length);
-        } catch (e) {
-          console.error("Error parsing favorites inside navbar", e);
-        }
-      } else {
-        setfavouriteCount(0);
-      }
-    }
-  };
-
-  // 🟢 Component mount hone par aur storage update hone par count check karo
-  useEffect(() => {
-    updatefavouriteCount();
-
-    // Jab kisi aur component (slider/home) se items tabdeel hon, yeh automatic run hoga
-    window.addEventListener("storage", updatefavouriteCount);
-    
-    return () => {
-      window.removeEventListener("storage", updatefavouriteCount);
-    };
-  }, []);
+  const { cartCount, favCount } = useStore();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-white/90 backdrop-blur">
@@ -91,11 +60,10 @@ export default function Navbar() {
 
         {/* Desktop Menu Buttons */}
         <div className="hidden items-center gap-3 md:flex">
-          {/* 🟢 Favourites Button with Dynamic Count */}
-          <button
-            onClick={() => router.push("/favorites")}
-            aria-label="favourite"
-            className="relative flex h-10 w-10 items-center justify-center text-foreground hover:text-brand transition-colors rounded-full"
+          <Link
+            href="/favourite"
+            aria-label="favorites"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-brand-light hover:text-brand"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -109,17 +77,16 @@ export default function Navbar() {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            {favouriteCount > 0 && (
+            {favCount > 0 && (
               <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
-                {favouriteCount}
+                {favCount}
               </span>
             )}
-          </button>
+          </Link>
 
-          {/* Cart Button */}
-          <button
-            onClick={() => router.push("/cart")}
-            aria-label="cart"
+          <Link
+            href="/cart"
+            aria-label="Cart"
             className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-brand-light hover:text-brand"
           >
             <svg
@@ -136,10 +103,12 @@ export default function Navbar() {
               <circle cx="20" cy="21" r="1" />
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
-              2
-            </span>
-          </button>
+            {cartCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
 
           <Link
             href="/login"
@@ -210,11 +179,11 @@ export default function Navbar() {
             
             {/* Mobile Actions with Dynamic Counters */}
             <div className="mt-2 flex items-center gap-2 border-t border-border pt-3">
-              {/* 🟢 Mobile Favourites Button */}
-              <button
-                onClick={() => { router.push("/favourite"); setOpen(false); }}
-                aria-label="favourite"
-                className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-2 text-sm font-medium text-foreground hover:bg-surface"
+              <Link
+                href="/favourite"
+                onClick={() => setOpen(false)}
+                aria-label="favorites"
+                className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -228,14 +197,13 @@ export default function Navbar() {
                 >
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
-                favourite ({favouriteCount})
-              </button>
-              
-              {/* Mobile Cart Button */}
-              <button
-                onClick={() => { router.push("/cart"); setOpen(false); }}
-                aria-label="cart"
-                className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border py-2 text-sm font-medium text-foreground hover:bg-surface"
+                favorites ({favCount})
+              </Link>
+              <Link
+                href="/cart"
+                onClick={() => setOpen(false)}
+                aria-label="Cart"
+                className="flex flex-1 items-center justify-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -251,8 +219,8 @@ export default function Navbar() {
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                 </svg>
-                Cart (2)
-              </button>
+                Cart ({cartCount})
+              </Link>
             </div>
             
             <div className="flex gap-2 pt-2">

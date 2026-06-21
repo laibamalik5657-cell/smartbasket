@@ -8,7 +8,7 @@ This document is written for AI coding agents who need to understand, build, and
 - **Version:** `0.1.0`
 - **Type:** Next.js web application using the App Router
 - **Domain:** Online grocery store focused on fresh produce, pantry staples, dairy, bakery, and household items (content references Pakistani Rupee pricing and local brands).
-- **Scope:** This is a frontend prototype. Product, cart, and favourite data are hard-coded or kept in React component state. Auth (login/register/forgot-password) uses a Mongoose-backed User collection in MongoDB, but sessions/JWTS/cookies and checkout integration are still demo-only.
+- **Scope:** This is a frontend prototype. Product data is hard-coded. **Cart, favourites, and placed orders are persisted client-side in `localStorage`** via a shared store (`lib/store.tsx`). Auth (login/register/forgot-password) uses a Mongoose-backed User collection in MongoDB, but sessions/JWTs/cookies are still demo-only, and checkout/order placement is client-side only (no order is sent to a backend).
 
 ## Technology Stack
 
@@ -21,6 +21,8 @@ This document is written for AI coding agents who need to understand, build, and
 - **Carousel:** [swiper](https://swiperjs.com) `^12.2.0` (declared but currently unused)
 - **UI Components:** [shadcn/ui](https://ui.shadcn.com) with `radix-ui`, `class-variance-authority`, `clsx`, `tailwind-merge`
 - **Forms & Validation:** [react-hook-form](https://react-hook-form.com) `^7.79.0`, [@hookform/resolvers](https://github.com/react-hook-form/resolvers) `^5.4.0`, [Zod](https://zod.dev) `^4.4.3`
+- **HTTP client:** [axios](https://axios-http.com) `^1.18.0` — all client→API calls go through `lib/axios.ts` (do **not** use `fetch`)
+- **Client state:** shared cart/favourites/orders store in `lib/store.tsx` (React `useSyncExternalStore` over `localStorage`)
 - **Database:** [MongoDB](https://www.mongodb.com) with [Mongoose](https://mongoosejs.com) `^9.7.0`
 - **Font:** `Geist` and `Geist_Mono` loaded via `next/font/google`
 - **Package Manager:** [pnpm](https://pnpm.io)
@@ -29,52 +31,47 @@ This document is written for AI coding agents who need to understand, build, and
 ## Project Structure
 
 ```text
-/Users/macbook/Projects/six-sense/basket/smartbasket
+smartbasket
 ├── app/                    # Next.js App Router pages and global styles
+│   ├── _components/        # Client components co-located with routes
+│   │   ├── category-slider/index.tsx  # Home category slider (reads categories from DB)
+│   │   └── product-card.tsx           # Featured-product card with working add/favourite
 │   ├── about/page.tsx
-│   ├── api/auth/           # Auth API routes (in-memory, prototype only)
-│   │   ├── login/route.ts
-│   │   ├── register/route.ts
-│   │   └── forgot-password/route.ts
-│   ├── cart/page.tsx
+│   ├── api/
+│   │   ├── auth/           # Auth API routes (MongoDB-backed; each route is self-contained)
+│   │   │   ├── login/route.ts
+│   │   │   ├── register/route.ts
+│   │   │   └── forgot-password/route.ts
+│   │   └── seed/categories/route.ts
+│   ├── cart/page.tsx       # Cart + checkout + place-order flow (reads the store)
 │   ├── contact/page.tsx
 │   ├── favourite/page.tsx
 │   ├── forgot-password/page.tsx
 │   ├── items/see-more/page.tsx
 │   ├── login/page.tsx
+│   ├── order-confirmation/page.tsx     # Post-checkout confirmation (reads ?id= from store)
 │   ├── signup/page.tsx
 │   ├── ShopByCategory/page.tsx
 │   ├── globals.css
-│   ├── layout.tsx          # Root layout: fonts, metadata, Navbar, Footer
+│   ├── layout.tsx          # Root layout: fonts, metadata, StoreProvider, Navbar, Footer
 │   └── page.tsx            # Home / landing page
 ├── components/             # Shared React components
-│   ├── CategorySlider.tsx  # Client category slider used on the home page
 │   ├── Footer.tsx
-│   ├── Navbar.tsx
-│   └── ui/                 # shadcn/ui components
-│       ├── button.tsx
-│       ├── checkbox.tsx
-│       ├── form.tsx
-│       ├── input.tsx
-│       └── label.tsx
-├── lib/                    # Shared server-side utilities, models, and validation
-│   ├── auth.ts             # Password helpers and user service backed by MongoDB
+│   ├── Navbar.tsx          # Cart/favourite links + live counts (reads the store)
+│   └── ui/                 # shadcn/ui components (button, checkbox, form, input, label)
+├── lib/                    # Shared utilities and client-side store
+│   ├── axios.ts            # Shared axios instance (baseURL "/api")
+│   ├── store.tsx           # localStorage-backed cart/favourites/orders (useSyncExternalStore)
 │   ├── mongodb.ts          # Cached Mongoose connection helper
 │   ├── utils.ts            # Tailwind class merging
-│   ├── models/
-│   │   ├── Category.ts     # Mongoose Category model
-│   │   └── User.ts         # Mongoose User model
-│   ├── seed/
-│   │   └── categories.ts   # Default categories and seed helper
-│   └── validations/
-│       └── auth.ts         # Zod schemas for auth forms and API routes
-├── public/                 # Static assets
-│   ├── dashboard/          # Dashboard-style product icons
-│   ├── product/            # Single product images
-│   └── products/           # Product grid images
-├── types/                  # TypeScript declarations
-│   └── next-shims.d.ts
-├── .claude/                # Claude IDE local settings
+│   └── seed/categories.ts  # Default categories and seed helper
+├── models/                 # Mongoose models
+│   ├── Category.ts
+│   └── User.ts
+├── schema/                 # Zod schemas for auth (imported as @/schema)
+│   └── index.ts
+├── public/                 # Static assets (dashboard/, product/, products/)
+├── types/                  # TypeScript declarations (next-shims.d.ts)
 ├── next.config.ts          # Next.js configuration
 ├── eslint.config.mjs       # ESLint flat config
 ├── postcss.config.mjs      # Tailwind v4 PostCSS plugin
@@ -83,24 +80,27 @@ This document is written for AI coding agents who need to understand, build, and
 └── package.json
 ```
 
+> Auth logic lives **directly in each `app/api/auth/*/route.ts`** (**bcrypt** hashing against the `User` model — bcrypt embeds its own salt, so there is no `passwordSalt` column). There is no shared `lib/auth.ts`. `bcrypt` is native: see `serverExternalPackages` in `next.config.ts` and `pnpm.onlyBuiltDependencies` in `package.json`.
+
 ### Route Map
 
-| Route | File | Notes |
-|-------|------|-------|
-| `/` | `app/page.tsx` | Home: hero, category slider (fetched from MongoDB), featured products, value props, coupon CTA |
-| `/about` | `app/about/page.tsx` | Marketing about page |
-| `/contact` | `app/contact/page.tsx` | Contact form + FAQ (presentational) |
-| `/cart` | `app/cart/page.tsx` | Shopping cart with local state |
-| `/favourite` | `app/favourite/page.tsx` | Favourites/wishlist with local state |
-| `/items/see-more` | `app/items/see-more/page.tsx` | Product grid with category filter |
-| `/ShopByCategory` | `app/ShopByCategory/page.tsx` | Standalone category slider page |
-| `/login` | `app/login/page.tsx` | Sign-in page (shadcn Form + react-hook-form + Zod, calls `/api/auth/login`) |
-| `/signup` | `app/signup/page.tsx` | Sign-up page (shadcn Form + react-hook-form + Zod, calls `/api/auth/register`) |
-| `/forgot-password` | `app/forgot-password/page.tsx` | Forgot-password page (shadcn Form + react-hook-form + Zod, calls `/api/auth/forgot-password`) |
-| `/api/auth/login` | `app/api/auth/login/route.ts` | POST: validates with Zod, queries MongoDB, returns user or 401 |
-| `/api/auth/register` | `app/api/auth/register/route.ts` | POST: validates with Zod, creates User document or returns 409 |
-| `/api/auth/forgot-password` | `app/api/auth/forgot-password/route.ts` | POST: validates with Zod, returns generic success message |
-| `/api/seed/categories` | `app/api/seed/categories/route.ts` | POST: drops and re-seeds the Category collection |
+| Route                       | File                                    | Notes                                                                                          |
+| --------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `/`                         | `app/page.tsx`                          | Home: hero, category slider (fetched from MongoDB), featured products, value props, coupon CTA |
+| `/about`                    | `app/about/page.tsx`                    | Marketing about page                                                                           |
+| `/contact`                  | `app/contact/page.tsx` + `contact-form.tsx` | Contact info (server) + shadcn `Form` (client, RHF + Zod, client-side only — no API yet)   |
+| `/cart`                     | `app/cart/page.tsx`                     | Cart list → checkout form → Place Order (store-backed; validates, saves order, clears cart)    |
+| `/favourite`                | `app/favourite/page.tsx`                | Favourites (store-backed); each item has a working Add-to-Cart                                 |
+| `/items/see-more`           | `app/items/see-more/page.tsx`           | Product grid with category filter; add-to-cart & favourite write to the store                  |
+| `/ShopByCategory`           | `app/ShopByCategory/page.tsx`           | Standalone category slider page                                                                |
+| `/login`                    | `app/login/page.tsx`                    | Sign-in page (useState form, posts to `/api/auth/login` via `lib/axios`)                       |
+| `/signup`                   | `app/signup/page.tsx`                   | Sign-up page (useState form, posts to `/api/auth/register` via `lib/axios`)                    |
+| `/forgot-password`          | `app/forgot-password/page.tsx`          | Forgot-password (shadcn Form + react-hook-form + Zod, posts via `lib/axios`)                   |
+| `/order-confirmation`       | `app/order-confirmation/page.tsx`       | Reads `?id=` and shows the placed order from the store                                          |
+| `/api/auth/login`           | `app/api/auth/login/route.ts`           | POST: validates with Zod, queries MongoDB, returns user or 401                                 |
+| `/api/auth/register`        | `app/api/auth/register/route.ts`        | POST: validates with Zod, creates User document or returns 409                                 |
+| `/api/auth/forgot-password` | `app/api/auth/forgot-password/route.ts` | POST: validates with Zod, returns generic success message                                      |
+| `/api/seed/categories`      | `app/api/seed/categories/route.ts`      | POST: drops and re-seeds the Category collection                                               |
 
 ## Build and Development Commands
 
@@ -134,22 +134,30 @@ pnpm lint
 
 Auth data is stored in MongoDB via Mongoose.
 
-1. Create a MongoDB database (local, Docker, or Atlas).
-2. Add a `.env.local` file at the project root:
+1. Run a MongoDB instance (local, Docker, or Atlas).
+2. Set `MONGODB_URI` in the project-root `.env` (already committed for local dev — and gitignored via `.env*`):
 
    ```env
-   MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/smartbasket?retryWrites=true&w=majority
+   # local (current default)
+   MONGODB_URI=mongodb://127.0.0.1:27017/smart-basket
+   # or Atlas
+   # MONGODB_URI=mongodb+srv://<user>:<password>@<cluster>.mongodb.net/smartbasket?retryWrites=true&w=majority
    ```
 
-3. Run `pnpm dev`. The auth API routes connect on first request and seed a demo user (`demo@smartbasket.com` / `password123`) if one does not exist.
+   `connectToDatabase()` accepts any valid `MONGODB_URI`.
+
+3. Run `pnpm dev`. The `/api/auth/login` route connects on first request and seeds a demo user (`demo@smartbasket.com` / `password123`) if one does not exist.
+
+> See the local-MongoDB start command and troubleshooting steps in `CLAUDE.md`.
 
 ## Code Style and Conventions
 
 ### Component Style
 
 - Pages and components are written as **default-exported functional components**.
-- Interactive pages (cart, favourites, home slider, product grid) use `"use client"` at the top of the file.
-- Presentational pages (`about`, `contact`) are server components by default. Interactive auth pages (`login`, `signup`, `forgot-password`) are client components that call the auth API routes.
+- Interactive pages (cart, favourites, home slider, product grid) use `"use client"` and read/write shared state via `useStore()` from `lib/store.tsx`.
+- Presentational pages (`about`, `contact`) are server components by default. Interactive auth pages (`login`, `signup`, `forgot-password`) are client components that call the auth API routes via `lib/axios`.
+- The shared client store lives at `app/_components/category-slider/index.tsx` for the slider and `lib/store.tsx` for cart/favourites/orders. `StoreProvider` wraps the app in `app/layout.tsx`.
 - Components use a mix of inline SVGs and `lucide-react` icons.
 
 ### Styling Conventions
@@ -187,9 +195,9 @@ Auth data is stored in MongoDB via Mongoose.
 As of the latest exploration, `pnpm lint` reports:
 
 - **0 errors**.
-- **3 warnings** about using native `<img>` instead of `next/image` for performance.
+- **2 warnings** about using native `<img>` instead of `next/image` (in `app/ShopByCategory/page.tsx` and `app/_components/category-slider/index.tsx`).
 
-The unescaped apostrophe in `app/ShopByCategory/page.tsx` has been fixed.
+Note: this repo's ESLint treats `react-hooks/set-state-in-effect` as an **error**, which forbids the "load from localStorage in `useEffect`" / mounted-flag patterns — hence `lib/store.tsx` uses `useSyncExternalStore`.
 
 ## Deployment Process
 
@@ -200,16 +208,16 @@ The unescaped apostrophe in `app/ShopByCategory/page.tsx` has been fixed.
 
 ## Security Considerations
 
-- **Prototype authentication only:** `/api/auth/*` routes persist users in MongoDB using salted SHA-256 password hashes. There are still no real sessions, JWTs, cookies, or email delivery; treat auth as a demo.
+- **Authentication:** `/api/auth/*` routes persist users in MongoDB and hash passwords with **bcrypt** (cost 12, computed inline in each route — no shared `lib/auth.ts`). There are still no real sessions, JWTs, cookies, or email delivery; treat auth as a demo.
 - **Database backend:** User data is stored in MongoDB via Mongoose. A unique index on `email` prevents duplicate accounts.
 - **External images:** The app loads images from third-party domains. A Content Security Policy should be added before production use.
-- **Input validation:** Login and signup forms are validated with Zod on both client and API route. Contact form validation is still presentational.
-- **Environment variables:** The app reads `MONGODB_URI` from the environment. Create `.env.local` at the project root and keep it out of version control.
+- **Input validation:** Login, signup, forgot-password, and contact forms all use shadcn `Form` + react-hook-form + Zod (`@/schema`). Auth forms also re-validate with Zod in the API route; the contact form is client-side only (no API yet).
+- **Environment variables:** The app reads `MONGODB_URI` from the environment (project-root `.env`; `.env*` is gitignored).
 
 ## Common Gotchas for Agents
 
 1. **Always run `pnpm install` first** on a fresh checkout; the lockfile is the source of truth.
-2. **Auth requires MongoDB.** Set `MONGODB_URI` in `.env.local` or auth routes will throw at runtime. Cart and favourites are still purely local `useState`.
+2. **Auth requires MongoDB.** Set `MONGODB_URI` in `.env` or auth routes will throw at runtime. Cart, favourites, and orders persist in `localStorage` via `lib/store.tsx` — use `useStore()`, don't reintroduce per-page `useState`. Use `lib/axios`, not `fetch`.
 3. **Watch for lint errors** caused by unescaped characters (`'`, `"`, `>`) in JSX text.
 4. **Prefer `next/image`** over `<img>` for new images, and update `next.config.ts` `images.remotePatterns` if new external hostnames are introduced.
 5. **Keep files small:** Avoid adding large base64 strings to source files; place images in `public/` or use external optimised URLs.

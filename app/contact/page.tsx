@@ -1,3 +1,5 @@
+import ContactForm from "./contact-form";
+
 export default function ContactPage() {
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -81,44 +83,7 @@ export default function ContactPage() {
                   Send Us a Message
                 </h2>
 
-                <form className="space-y-5">
-
-                  <div className="grid md:grid-cols-2 gap-4">
-
-                    <input
-                      type="text"
-                      placeholder="Full Name"
-                      className="border rounded-lg p-3 w-full"
-                    />
-
-                    <input
-                      type="email"
-                      placeholder="Email Address"
-                      className="border rounded-lg p-3 w-full"
-                    />
-
-                  </div>
-
-                  <input
-                    type="text"
-                    placeholder="Subject"
-                    className="border rounded-lg p-3 w-full"
-                  />
-
-                  <textarea
-                    rows={6}
-                    placeholder="Write your message..."
-                    className="border rounded-lg p-3 w-full"
-                  />
-
-                  <button
-                    type="submit"
-                    className="bg-green-600 hover:bg-green-700 text-white px-8 py-3 rounded-lg font-medium"
-                  >
-                    Send Message
-                  </button>
-
-                </form>
+                <ContactForm />
 
               </div>
 
