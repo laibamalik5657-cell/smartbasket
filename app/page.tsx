@@ -1,19 +1,20 @@
 import Link from "next/link";
 import CategorySlider from "./_components/category-slider";
+import ProductCard, { type FeaturedProduct } from "./_components/product-card";
 import { seedCategories } from "@/lib/seed/categories";
-import { Category, ICategory } from "@/lib/models/Category";
+import { Category, ICategory } from "@/models/Category";
 
 export const dynamic = "force-dynamic";
 
-const products = [
-  { name: "Bananas", price: "Rs.250", unit: "/ dozen", emoji: "/products/bananas.png", tag: "Fresh" },
-  { name: "Bread", price: "Rs.180", unit: "/ 1 pack", emoji: "/products/white-bread.png", tag: "Best Seller" },
-  { name: "Milk", price: "Rs.220", unit: "/ 1L", emoji: "/products/milk.png", tag: "Daily" },
-  { name: "Flour", price: "Rs.1100", unit: "/ 10 kg", emoji: "/products/flour.png", tag: "Bakery" },
-  { name: "Rice", price: "Rs.400", unit: "/ 1 kg", emoji: "/products/rice.png", tag: "Seasonal" },
-  { name: "Eggs", price: "Rs.350", unit: "/ 1 dozen", emoji: "/products/eggs.png", tag: "Organic" },
-  { name: "Cooking Oil", price: "Rs.520", unit: "/ 1 kg", emoji: "/products/oil.png", tag: "Pantry" },
-  { name: "Chips", price: "Rs.60", unit: "/ 1 pack", emoji: "/products/milk.png", tag: "Fresh" },
+const products: FeaturedProduct[] = [
+  { id: "bananas", name: "Bananas", price: 250, unit: "/ dozen", image: "/products/bananas.png", tag: "Fresh" },
+  { id: "bread", name: "Bread", price: 180, unit: "/ 1 pack", image: "/products/white-bread.png", tag: "Best Seller" },
+  { id: "milk", name: "Milk", price: 220, unit: "/ 1L", image: "/products/milk.png", tag: "Daily" },
+  { id: "flour", name: "Flour", price: 1100, unit: "/ 10 kg", image: "/products/flour.png", tag: "Bakery" },
+  { id: "rice", name: "Rice", price: 400, unit: "/ 1 kg", image: "/products/rice.png", tag: "Seasonal" },
+  { id: "eggs", name: "Eggs", price: 350, unit: "/ 1 dozen", image: "/products/eggs.png", tag: "Organic" },
+  { id: "cooking-oil", name: "Cooking Oil", price: 520, unit: "/ 1 kg", image: "/products/oil.png", tag: "Pantry" },
+  { id: "chips", name: "Chips", price: 60, unit: "/ 1 pack", image: "/products/milk.png", tag: "Fresh" },
 ];
 
 const features = [
@@ -21,7 +22,15 @@ const features = [
     title: "Free delivery over 3km",
     body: "Same-day delivery on orders above $40 within the city.",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-6 w-6"
+      >
         <rect x="1" y="3" width="15" height="13" />
         <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
         <circle cx="5.5" cy="18.5" r="2.5" />
@@ -33,7 +42,15 @@ const features = [
     title: "Always fresh",
     body: "Sourced daily from local farms — quality guaranteed or your money back.",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-6 w-6"
+      >
         <path d="M12 2a10 10 0 1 0 10 10" />
         <path d="M22 4 12 14.01l-3-3" />
       </svg>
@@ -43,7 +60,15 @@ const features = [
     title: "Cancel Order Before Dispatched",
     body: "Changed your mind? Cancel your order easily before it leaves our store.",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-6 w-6"
+      >
         <polyline points="1 4 1 10 7 10" />
         <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
       </svg>
@@ -53,7 +78,15 @@ const features = [
     title: "Secure checkout",
     body: "Encrypted payments and trusted providers keep your data safe.",
     icon: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="h-6 w-6"
+      >
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
         <path d="M7 11V7a5 5 0 0 1 10 0v4" />
       </svg>
@@ -64,7 +97,9 @@ const features = [
 export default async function Home() {
   await seedCategories();
 
-  const categoryDocs = await Category.find({}).sort({ order: 1 }).lean<ICategory[]>();
+  const categoryDocs = await Category.find({})
+    .sort({ order: 1 })
+    .lean<ICategory[]>();
   const categories = categoryDocs.map((c) => ({
     _id: c._id.toString(),
     name: c.name,
@@ -86,17 +121,26 @@ export default async function Home() {
               Same-day delivery available
             </span>
             <h1 className="mt-5 text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              Fresh groceries,<br />
+              Fresh groceries,
+              <br />
               <span className="text-brand">delivered in minutes.</span>
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted">
-              Stock your kitchen with farm-fresh produce, dairy, bakery and pantry
-              staples — handpicked daily and delivered to your door.
+              Stock your kitchen with farm-fresh produce, dairy, bakery and
+              pantry staples — handpicked daily and delivered to your door.
             </p>
 
             <form className="mt-8 flex max-w-md items-center gap-2 rounded-full bg-white p-1.5 shadow-sm ring-1 ring-border focus-within:ring-brand">
               <span className="pl-3 text-muted">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
                   <circle cx="11" cy="11" r="8" />
                   <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
@@ -145,9 +189,13 @@ export default async function Home() {
                     {p.e}
                   </div>
                   <div className="mt-3">
-                    <p className="text-sm font-semibold text-foreground">{p.n}</p>
+                    <p className="text-sm font-semibold text-foreground">
+                      {p.n}
+                    </p>
                     <div className="mt-1 flex items-center justify-between">
-                      <span className="text-sm font-bold text-brand">{p.p}</span>
+                      <span className="text-sm font-bold text-brand">
+                        {p.p}
+                      </span>
                       <button
                         aria-label={`Add ${p.n} to cart`}
                         className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-white hover:bg-brand-dark"
@@ -171,51 +219,20 @@ export default async function Home() {
           <div className="flex items-end justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold sm:text-3xl">Featured today</h2>
-              <p className="mt-1 text-sm text-muted">Handpicked picks from our farmers and bakers.</p>
+              <p className="mt-1 text-sm text-muted">
+                Handpicked picks from our farmers and bakers.
+              </p>
             </div>
-            <Link href="/items/see-more" className="hidden text-sm font-medium text-brand hover:underline sm:inline">
+            <Link
+              href="/items/see-more"
+              className="hidden text-sm font-medium text-brand hover:underline sm:inline"
+            >
               See more →
             </Link>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((p) => (
-              <article
-                key={p.name}
-                className="group flex flex-col rounded-2xl border border-border bg-white p-4 transition-shadow hover:shadow-md"
-              >
-                <div className="relative flex aspect-square w-full items-center justify-center rounded-xl bg-white overflow-hidden">
-                  <span className="absolute left-2 top-2 z-10 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-brand shadow-sm">
-                    {p.tag}
-                  </span>
-                  <button
-                    aria-label={`Favourite ${p.name}`}
-                    className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white text-foreground shadow-sm hover:text-brand"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-                    </svg>
-                  </button>
-                  <img className="h-20 w-20" src={p.emoji} alt={p.name} />
-                </div>
-                <div className="mt-3 flex flex-1 flex-col">
-                  <h3 className="text-sm font-semibold text-foreground">{p.name}</h3>
-                  <p className="text-xs text-muted">In stock</p>
-                  <div className="mt-3 flex items-center justify-between">
-                    <p className="text-base font-bold text-gray-900">
-                      {p.price}
-                      <span className="ml-1 text-xs font-normal text-muted">{p.unit}</span>
-                    </p>
-                    <button className="flex items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-dark transition-colors">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-                        <circle cx="9" cy="21" r="1" />
-                        <circle cx="20" cy="21" r="1" />
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                      </svg>
-                      Add
-                    </button>
-                  </div>
-                </div>
-              </article>
+              <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </div>
@@ -226,7 +243,10 @@ export default async function Home() {
         <h2 className="text-2xl font-bold sm:text-3xl">Why SmartBasket?</h2>
         <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {features.map((f) => (
-            <div key={f.title} className="rounded-2xl border border-border bg-white p-6">
+            <div
+              key={f.title}
+              className="rounded-2xl border border-border bg-white p-6"
+            >
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-brand-light text-brand">
                 {f.icon}
               </div>
@@ -246,8 +266,8 @@ export default async function Home() {
                 Get 20% off your first order
               </h2>
               <p className="mt-2 max-w-md text-sm text-white/90">
-                Sign up for SmartBasket and we will drop a welcome coupon in your
-                inbox. Fresh deals, every week.
+                Sign up for SmartBasket and we will drop a welcome coupon in
+                your inbox. Fresh deals, every week.
               </p>
               <div className="mt-6 flex flex-wrap gap-3">
                 <Link

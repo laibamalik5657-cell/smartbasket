@@ -3,183 +3,188 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useState, FormEvent } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { isAxiosError } from "axios";
+
+import api from "@/lib/axios";
+import { signupFormSchema, type SignupFormInput } from "@/schema";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [agreed, setAgreed] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
   } | null>(null);
 
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  const form = useForm<SignupFormInput>({
+    resolver: zodResolver(signupFormSchema),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      agreed: false,
+    },
+  });
+
+  async function onSubmit(values: SignupFormInput) {
     setMessage(null);
-
-    if (!firstName.trim()) {
-      setMessage({ type: "error", text: "Please enter your first name." });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setMessage({ type: "error", text: "Passwords do not match." });
-      return;
-    }
-
-    if (!agreed) {
-      setMessage({ type: "error", text: "You must agree to the terms." });
-      return;
-    }
-
-    setLoading(true);
-
     try {
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ firstName, lastName, email, password }),
+      await api.post("/auth/register", {
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        password: values.password,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage({
-          type: "error",
-          text: data.message || "Account creation failed.",
-        });
-      } else {
-        setMessage({ type: "success", text: "Account created successfully." });
-        router.push("/");
-      }
-    } catch {
-      setMessage({
-        type: "error",
-        text: "Something went wrong. Please try again.",
-      });
-    } finally {
-      setLoading(false);
+      setMessage({ type: "success", text: "Account created successfully." });
+      router.push("/");
+    } catch (err) {
+      const text = isAxiosError(err)
+        ? err.response?.data?.message || "Account creation failed."
+        : "Something went wrong. Please try again.";
+      setMessage({ type: "error", text });
     }
   }
+
+  const loading = form.formState.isSubmitting;
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="w-full max-w-xl rounded-3xl bg-white p-6 shadow-lg">
         <h1 className="text-3xl font-bold text-center">Create Account</h1>
-
         <p className="mt-2 text-center text-gray-500">
           Join SmartBasket and start shopping today
         </p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-          {/* First Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1">First Name</label>
-            <input
-              type="text"
-              placeholder="Enter your first name"
-              required
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-6 space-y-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your first name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Last Name */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Last Name</label>
-            <input
-              type="text"
-              placeholder="Enter your last name"
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your last name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Email Address
-            </label>
-            <input
-              type="email"
-              placeholder="you@example.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="you@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium mb-1">Password</label>
-            <input
-              type="password"
-              placeholder="Create password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Create password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Confirm Password */}
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Confirm Password
-            </label>
-            <input
-              type="password"
-              placeholder="Confirm password"
-              required
-              minLength={8}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-green-600"
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="Confirm password" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          {/* Terms */}
-          <label className="flex items-start gap-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
-              className="mt-1"
-              checked={agreed}
-              onChange={(e) => setAgreed(e.target.checked)}
+            <FormField
+              control={form.control}
+              name="agreed"
+              render={({ field }) => (
+                <FormItem>
+                  <div className="flex items-start gap-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                        className="mt-0.5"
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-normal leading-snug text-gray-600">
+                      I agree to the Terms &amp; Conditions and Privacy Policy
+                    </FormLabel>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            <span>I agree to the Terms & Conditions and Privacy Policy</span>
-          </label>
 
-          {message && (
-            <div
-              className={`rounded-lg px-3 py-2 text-sm ${
-                message.type === "error"
-                  ? "bg-red-50 text-red-600"
-                  : "bg-green-50 text-green-600"
-              }`}
+            {message && (
+              <div
+                className={`rounded-lg px-3 py-2 text-sm ${
+                  message.type === "error"
+                    ? "bg-red-50 text-red-600"
+                    : "bg-green-50 text-green-600"
+                }`}
+              >
+                {message.text}
+              </div>
+            )}
+
+            <Button
+              type="submit"
+              disabled={loading}
+              className="h-auto w-full rounded-lg bg-green-600 py-2.5 text-sm font-medium text-white hover:bg-green-700"
             >
-              {message.text}
-            </div>
-          )}
-
-          {/* Signup Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-green-600 py-2.5 text-sm font-medium text-white hover:bg-green-700 disabled:opacity-60"
-          >
-            {loading ? "Creating account..." : "Create Account"}
-          </button>
-        </form>
+              {loading ? "Creating account..." : "Create Account"}
+            </Button>
+          </form>
+        </Form>
 
         {/* Divider */}
         <div className="my-5 flex items-center gap-3">
@@ -189,9 +194,10 @@ export default function SignupPage() {
         </div>
 
         {/* Google Signup */}
-        <button
+        <Button
           type="button"
-          className="flex w-full items-center justify-center gap-3 rounded-lg border py-2.5 text-sm font-medium hover:bg-gray-50"
+          variant="outline"
+          className="h-auto w-full gap-3 rounded-lg py-2.5 text-sm font-medium"
         >
           <Image
             src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
@@ -200,15 +206,11 @@ export default function SignupPage() {
             height={20}
           />
           Continue with Google
-        </button>
+        </Button>
 
-        {/* Login Link */}
         <p className="mt-5 text-center text-sm text-gray-500">
           Already have an account?{" "}
-          <Link
-            href="/login"
-            className="font-medium text-green-600 hover:underline"
-          >
+          <Link href="/login" className="font-medium text-green-600 hover:underline">
             Sign In
           </Link>
         </p>

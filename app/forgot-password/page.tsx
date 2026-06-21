@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isAxiosError } from "axios";
+import api from "@/lib/axios";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,7 +17,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validations/auth";
+import { forgotPasswordSchema, type ForgotPasswordInput } from "@/schema";
 
 export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
@@ -31,22 +33,14 @@ export default function ForgotPasswordPage() {
     setMessage(null);
 
     try {
-      const response = await fetch("/api/auth/forgot-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setMessage({ type: "error", text: data.message || "Request failed." });
-      } else {
-        setMessage({ type: "success", text: data.message });
-        form.reset();
-      }
-    } catch {
-      setMessage({ type: "error", text: "Something went wrong. Please try again." });
+      const { data } = await api.post("/auth/forgot-password", values);
+      setMessage({ type: "success", text: data.message });
+      form.reset();
+    } catch (err) {
+      const text = isAxiosError(err)
+        ? err.response?.data?.message || "Request failed."
+        : "Something went wrong. Please try again.";
+      setMessage({ type: "error", text });
     } finally {
       setLoading(false);
     }

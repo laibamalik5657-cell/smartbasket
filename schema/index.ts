@@ -26,11 +26,17 @@ export const registerSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 
-export const signupFormSchema = registerSchema.extend({
-  agreed: z.boolean().refine((value) => value === true, {
-    message: "You must agree to the Terms and Privacy Policy.",
-  }),
-});
+export const signupFormSchema = registerSchema
+  .extend({
+    confirmPassword: z.string().min(1, "Please confirm your password."),
+    agreed: z.boolean().refine((value) => value === true, {
+      message: "You must agree to the Terms and Privacy Policy.",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 export type SignupFormInput = z.infer<typeof signupFormSchema>;
 
@@ -39,3 +45,12 @@ export const forgotPasswordSchema = z.object({
 });
 
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const contactSchema = z.object({
+  name: z.string().min(1, "Name is required."),
+  email: emailSchema,
+  subject: z.string().min(1, "Subject is required."),
+  message: z.string().min(10, "Message must be at least 10 characters."),
+});
+
+export type ContactInput = z.infer<typeof contactSchema>;

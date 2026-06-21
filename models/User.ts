@@ -6,7 +6,6 @@ export interface IUser {
   lastName: string;
   email: string;
   passwordHash: string;
-  passwordSalt: string;
   createdAt: Date;
 }
 
@@ -33,17 +32,14 @@ const UserSchema = new Schema<IUser>(
       type: String,
       required: [true, "Password hash is required."],
     },
-    passwordSalt: {
-      type: String,
-      required: [true, "Password salt is required."],
-    },
   },
   {
     timestamps: {
       createdAt: true,
       updatedAt: false,
     },
-  }
+  },
 );
 
-export const User = (models.User as mongoose.Model<IUser>) || model<IUser>("User", UserSchema);
+export const User =
+  (models.User as mongoose.Model<IUser>) || model<IUser>("User", UserSchema);

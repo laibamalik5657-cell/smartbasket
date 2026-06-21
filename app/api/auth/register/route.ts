@@ -1,8 +1,12 @@
-import { createUser, findUserByEmail, seedDemoUser } from "@/lib/auth";
-import { registerSchema } from "@/lib/validations/auth";
+import bcrypt from "bcrypt";
+import { connectToDatabase } from "@/lib/mongodb";
+import { User, IUser } from "@/models/User";
+import { registerSchema } from "@/schema";
+
+const SALT_ROUNDS = 12;
 
 export async function POST(request: Request) {
-  await seedDemoUser();
+  await connectToDatabase();
 
   try {
     const body = await request.json();
@@ -17,22 +21,37 @@ export async function POST(request: Request) {
     }
 
     const { firstName, lastName, email, password } = result.data;
-    const normalizedEmail = email.toLowerCase();
+    const normalizedEmail = email.trim().toLowerCase();
 
-    if (await findUserByEmail(normalizedEmail)) {
+    const existing = await User.findOne({
+      email: normalizedEmail,
+    }).lean<IUser>();
+
+    if (existing) {
       return Response.json(
         { success: false, message: "An account with this email already exists." },
         { status: 409 }
       );
     }
 
-    const user = await createUser(firstName, lastName, normalizedEmail, password);
+    const user = await User.create({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: normalizedEmail,
+      passwordHash: await bcrypt.hash(password, SALT_ROUNDS),
+    });
 
     return Response.json(
       {
         success: true,
         message: "Account created successfully.",
-        user,
+        user: {
+          id: user._id.toString(),
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          createdAt: user.createdAt.toISOString(),
+        },
       },
       { status: 201 }
     );

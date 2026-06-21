@@ -1,4 +1,4 @@
-import { forgotPasswordSchema } from "@/lib/validations/auth";
+import { forgotPasswordSchema } from "@/schema";
 
 export async function POST(request: Request) {
   try {

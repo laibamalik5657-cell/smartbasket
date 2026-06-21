@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { useStore } from "@/lib/store";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -13,6 +14,7 @@ const navLinks = [
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { cartCount, favCount } = useStore();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-white/90 backdrop-blur">
@@ -46,9 +48,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
-                  active
-                    ? "text-brand"
-                    : "text-foreground hover:text-brand"
+                  active ? "text-brand" : "text-foreground hover:text-brand"
                 }`}
               >
                 {link.label}
@@ -58,8 +58,9 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          <button
-            aria-label="Favourites"
+          <Link
+            href="/favourite"
+            aria-label="favorites"
             className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-brand-light hover:text-brand"
           >
             <svg
@@ -74,12 +75,15 @@ export default function Navbar() {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
             </svg>
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
-              3
-            </span>
-          </button>
+            {favCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
+                {favCount}
+              </span>
+            )}
+          </Link>
 
-          <button
+          <Link
+            href="/cart"
             aria-label="Cart"
             className="relative flex h-10 w-10 items-center justify-center rounded-full text-foreground transition-colors hover:bg-brand-light hover:text-brand"
           >
@@ -97,10 +101,12 @@ export default function Navbar() {
               <circle cx="20" cy="21" r="1" />
               <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
             </svg>
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
-              2
-            </span>
-          </button>
+            {cartCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand px-1 text-[10px] font-semibold text-white">
+                {cartCount}
+              </span>
+            )}
+          </Link>
 
           <Link
             href="/login"
@@ -169,8 +175,10 @@ export default function Navbar() {
               );
             })}
             <div className="mt-2 flex items-center gap-2 border-t border-border pt-3">
-              <button
-                aria-label="Favourites"
+              <Link
+                href="/favourite"
+                onClick={() => setOpen(false)}
+                aria-label="favorites"
                 className="flex flex-1 items-center justify-center gap-2 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground"
               >
                 <svg
@@ -185,9 +193,11 @@ export default function Navbar() {
                 >
                   <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
                 </svg>
-                Favourites (3)
-              </button>
-              <button
+                favorites ({favCount})
+              </Link>
+              <Link
+                href="/cart"
+                onClick={() => setOpen(false)}
                 aria-label="Cart"
                 className="flex flex-1 items-center justify-center gap-2 rounded-md bg-brand px-3 py-2 text-sm font-medium text-white"
               >
@@ -205,8 +215,8 @@ export default function Navbar() {
                   <circle cx="20" cy="21" r="1" />
                   <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
                 </svg>
-                Cart (2)
-              </button>
+                Cart ({cartCount})
+              </Link>
             </div>
             <div className="flex gap-2 pt-2">
               <Link
