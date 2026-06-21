@@ -10,6 +10,7 @@ import { isAxiosError } from "axios";
 
 import api from "@/lib/axios";
 import { signupFormSchema, type SignupFormInput } from "@/schema";
+import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -25,6 +26,7 @@ import apiClient from "@/lib/axios";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { setUser } = useStore();
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
@@ -45,12 +47,15 @@ export default function SignupPage() {
   async function onSubmit(values: SignupFormInput) {
     setMessage(null);
     try {
-      await apiClient.post("/auth/register", {
+      const response = await apiClient.post("/auth/register", {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
       });
+      if (response.data?.user) {
+        setUser(response.data.user);
+      }
       setMessage({ type: "success", text: "Account created successfully." });
       router.push("/");
     } catch (err) {
