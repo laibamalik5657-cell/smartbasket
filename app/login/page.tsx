@@ -8,7 +8,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
 
-import api from "@/lib/axios";
 import { loginSchema, type LoginInput } from "@/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
