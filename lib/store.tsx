@@ -47,6 +47,7 @@ const CART_KEY = "smartbasket:cart";
 const FAV_KEY = "smartbasket:favorites";
 const ORDERS_KEY = "smartbasket:orders";
 const USER_KEY = "smartbasket:user";
+const TOKEN_KEY = "smartbasket:token";
 
 function readRaw<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -72,12 +73,14 @@ let cartCache: CartLine[] = EMPTY_CART;
 let favCache: Product[] = EMPTY_FAV;
 let ordersCache: Order[] = EMPTY_ORDERS;
 let userCache: User | null = null;
+let tokenCache: string | null = null;
 
 function loadCaches() {
   cartCache = readRaw<CartLine[]>(CART_KEY, EMPTY_CART);
   favCache = readRaw<Product[]>(FAV_KEY, EMPTY_FAV);
   ordersCache = readRaw<Order[]>(ORDERS_KEY, EMPTY_ORDERS);
   userCache = readRaw<User | null>(USER_KEY, null);
+  tokenCache = readRaw<string | null>(TOKEN_KEY, null);
 }
 
 if (typeof window !== "undefined") loadCaches();
@@ -130,6 +133,12 @@ function setUser(next: User | null) {
   emit();
 }
 
+function setToken(next: string | null) {
+  tokenCache = next;
+  persist(TOKEN_KEY, next);
+  emit();
+}
+
 /* Kept so existing <StoreProvider> in the layout keeps working — the store
  * itself is module-level, so this is just a passthrough. */
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -157,12 +166,25 @@ export function useStore() {
     () => userCache,
     () => null,
   );
+  const token = useSyncExternalStore(
+    subscribe,
+    () => tokenCache,
+    () => null,
+  );
 
   const setUserCallback = useCallback((next: User | null) => {
     setUser(next);
   }, []);
 
-  const clearUser = useCallback(() => setUser(null), []);
+  const setTokenCallback = useCallback((next: string | null) => {
+    setToken(next);
+  }, []);
+
+  // Logout: drop both the user and the auth token.
+  const clearUser = useCallback(() => {
+    setUser(null);
+    setToken(null);
+  }, []);
 
   const isAuthenticated = !!user;
 
@@ -247,6 +269,7 @@ export function useStore() {
     favorites,
     orders,
     user,
+    token,
     isAuthenticated,
     cartCount,
     favCount,
@@ -259,6 +282,7 @@ export function useStore() {
     placeOrder,
     getOrder,
     setUser: setUserCallback,
+    setToken: setTokenCallback,
     clearUser,
   };
 }
