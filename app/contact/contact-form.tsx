@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { isAxiosError } from "axios";
 
+import apiClient from "@/lib/axios";
 import { contactSchema, type ContactInput } from "@/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,11 +30,18 @@ export default function ContactForm() {
     defaultValues: { name: "", email: "", subject: "", message: "" },
   });
 
-  function onSubmit() {
-    // No backend yet — acknowledge client-side and reset. handleSubmit only
-    // runs this when the form passes contactSchema validation.
-    setMessage({ type: "success", text: "Thanks! Your message has been sent." });
-    form.reset();
+  async function onSubmit(values: ContactInput) {
+    setMessage(null);
+    try {
+      await apiClient.post("/contact", values);
+      setMessage({ type: "success", text: "Thanks! Your message has been sent." });
+      form.reset();
+    } catch (err) {
+      const text = isAxiosError(err)
+        ? err.response?.data?.message || "Failed to send message."
+        : "Something went wrong. Please try again.";
+      setMessage({ type: "error", text });
+    }
   }
 
   return (
