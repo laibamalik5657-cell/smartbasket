@@ -1,21 +1,11 @@
 import Link from "next/link";
 import CategorySlider from "./_components/category-slider";
 import ProductCard, { type FeaturedProduct } from "./_components/product-card";
-import { seedCategories } from "@/lib/seed/categories";
+import { connectToDatabase } from "@/lib/mongodb";
 import { Category, ICategory } from "@/models/Category";
+import { Product, IProduct } from "@/models/Product";
 
 export const dynamic = "force-dynamic";
-
-const products: FeaturedProduct[] = [
-  { id: "bananas", name: "Bananas", price: 250, unit: "/ dozen", image: "/products/bananas.png", tag: "Fresh" },
-  { id: "bread", name: "Bread", price: 180, unit: "/ 1 pack", image: "/products/white-bread.png", tag: "Best Seller" },
-  { id: "milk", name: "Milk", price: 220, unit: "/ 1L", image: "/products/milk.png", tag: "Daily" },
-  { id: "flour", name: "Flour", price: 1100, unit: "/ 10 kg", image: "/products/flour.png", tag: "Bakery" },
-  { id: "rice", name: "Rice", price: 400, unit: "/ 1 kg", image: "/products/rice.png", tag: "Seasonal" },
-  { id: "eggs", name: "Eggs", price: 350, unit: "/ 1 dozen", image: "/products/eggs.png", tag: "Organic" },
-  { id: "cooking-oil", name: "Cooking Oil", price: 520, unit: "/ 1 kg", image: "/products/oil.png", tag: "Pantry" },
-  { id: "chips", name: "Chips", price: 60, unit: "/ 1 pack", image: "/products/milk.png", tag: "Fresh" },
-];
 
 const features = [
   {
@@ -95,11 +85,24 @@ const features = [
 ];
 
 export default async function Home() {
-  await seedCategories();
+  await connectToDatabase();
 
   const categoryDocs = await Category.find({})
     .sort({ order: 1 })
     .lean<ICategory[]>();
+  const productDocs = await Product.find({})
+    .sort({ order: 1 })
+    .limit(8)
+    .lean<IProduct[]>();
+  const products: FeaturedProduct[] = productDocs.map((p) => ({
+    id: p.slug,
+    slug: p.slug,
+    name: p.name,
+    price: p.price,
+    unit: p.unit ?? "",
+    image: p.image,
+    tag: p.tag ?? "",
+  }));
   const categories = categoryDocs.map((c) => ({
     _id: c._id.toString(),
     name: c.name,

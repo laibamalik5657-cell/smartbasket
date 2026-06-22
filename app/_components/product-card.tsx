@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useStore, type Product } from "@/lib/store";
 
 export interface FeaturedProduct extends Product {
+  slug: string;
   tag?: string;
 }
 
@@ -18,8 +20,16 @@ export default function ProductCard({ product }: { product: FeaturedProduct }) {
     unit: product.unit,
   };
 
+  const stop = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
   return (
-    <article className="group flex flex-col rounded-2xl border border-border bg-white p-4 transition-shadow hover:shadow-md">
+    <Link
+      href={`/product/${product.slug}`}
+      className="group flex flex-col rounded-2xl border border-border bg-white p-4 transition-shadow hover:shadow-md"
+    >
       <div className="relative flex aspect-square w-full items-center justify-center rounded-xl bg-white overflow-hidden">
         {product.tag && (
           <span className="absolute left-2 top-2 z-10 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-brand shadow-sm">
@@ -28,7 +38,10 @@ export default function ProductCard({ product }: { product: FeaturedProduct }) {
         )}
         <button
           aria-label={`Favourite ${product.name}`}
-          onClick={() => toggleFavourite(storeProduct)}
+          onClick={(e) => {
+            stop(e);
+            toggleFavourite(storeProduct);
+          }}
           className={`absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-white shadow-sm hover:text-brand ${
             fav ? "text-red-500" : "text-foreground"
           }`}
@@ -59,7 +72,10 @@ export default function ProductCard({ product }: { product: FeaturedProduct }) {
             )}
           </p>
           <button
-            onClick={() => addToCart(storeProduct)}
+            onClick={(e) => {
+              stop(e);
+              addToCart(storeProduct);
+            }}
             className="flex items-center gap-1 rounded-full bg-brand px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-dark transition-colors"
           >
             <svg
@@ -79,6 +95,6 @@ export default function ProductCard({ product }: { product: FeaturedProduct }) {
           </button>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }
