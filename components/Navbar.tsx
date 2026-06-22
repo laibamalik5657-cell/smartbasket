@@ -1,9 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { ChevronDown, LogOut, Package, User as UserIcon } from "lucide-react";
 import { useStore } from "@/lib/store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -11,10 +20,22 @@ const navLinks = [
   { href: "/contact", label: "Contact Us" },
 ];
 
+const accountLinks = [
+  { href: "/my-orders", label: "My Orders", icon: Package },
+  { href: "/profile", label: "Profile", icon: UserIcon },
+];
+
 export default function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { cartCount, favCount } = useStore();
+  const { cartCount, favCount, user, clearUser } = useStore();
+
+  function handleLogout() {
+    clearUser();
+    setOpen(false);
+    router.push("/");
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-white/90 backdrop-blur">
@@ -108,18 +129,61 @@ export default function Navbar() {
             )}
           </Link>
 
-          <Link
-            href="/login"
-            className="ml-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand hover:text-brand"
-          >
-            Sign In
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
-          >
-            Sign Up
-          </Link>
+          {user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="ml-2 flex items-center gap-2 rounded-full border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors outline-none hover:border-brand hover:text-brand focus-visible:border-brand">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-light text-brand">
+                  <UserIcon className="h-3.5 w-3.5" />
+                </span>
+                {user.firstName}
+                <ChevronDown className="h-4 w-4 opacity-60" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel className="flex items-center gap-2 font-normal">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand">
+                    <UserIcon className="h-4 w-4" />
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">
+                      Welcome back,
+                    </span>
+                    <span className="text-sm font-medium text-foreground">
+                      {user.firstName} {user.lastName}
+                    </span>
+                  </span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {accountLinks.map(({ href, label, icon: Icon }) => (
+                  <DropdownMenuItem key={href} asChild>
+                    <Link href={href}>
+                      <Icon className="opacity-70" />
+                      {label}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
+                  <LogOut />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="ml-2 rounded-full border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:border-brand hover:text-brand"
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full bg-brand px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-dark"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
         </div>
 
         <button
@@ -218,22 +282,59 @@ export default function Navbar() {
                 Cart ({cartCount})
               </Link>
             </div>
-            <div className="flex gap-2 pt-2">
-              <Link
-                href="/login"
-                onClick={() => setOpen(false)}
-                className="flex-1 rounded-md border border-border px-3 py-2 text-center text-sm font-medium text-foreground"
-              >
-                Sign In
-              </Link>
-              <Link
-                href="/signup"
-                onClick={() => setOpen(false)}
-                className="flex-1 rounded-md bg-brand px-3 py-2 text-center text-sm font-medium text-white"
-              >
-                Sign Up
-              </Link>
-            </div>
+            {user ? (
+              <div className="mt-2 space-y-1 border-t border-border pt-3">
+                <div className="flex items-center gap-2 px-3 py-2">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-light text-brand">
+                    <UserIcon className="h-4 w-4" />
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">
+                      Welcome back,
+                    </span>
+                    <span className="text-sm font-medium text-foreground">
+                      {user.firstName} {user.lastName}
+                    </span>
+                  </span>
+                </div>
+                {accountLinks.map(({ href, label, icon: Icon }) => (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-surface"
+                  >
+                    <Icon className="h-4 w-4 opacity-70" />
+                    {label}
+                  </Link>
+                ))}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-destructive/10"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2 pt-2">
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="flex-1 rounded-md border border-border px-3 py-2 text-center text-sm font-medium text-foreground"
+                >
+                  Sign In
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="flex-1 rounded-md bg-brand px-3 py-2 text-center text-sm font-medium text-white"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
