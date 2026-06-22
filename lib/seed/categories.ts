@@ -1,5 +1,5 @@
-import { connectToDatabase } from "@/lib/mongodb";
-import { Category, ICategory } from "@/models/Category";
+import { connectToDatabase } from "../mongodb";
+import { Category, ICategory } from "../../models/Category";
 
 export const defaultCategories: Pick<
   ICategory,
