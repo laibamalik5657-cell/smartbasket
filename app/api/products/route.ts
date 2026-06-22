@@ -25,7 +25,10 @@ export async function GET(request: Request) {
     }));
     return Response.json({ success: true, products }, { status: 200 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error.";
-    return Response.json({ success: false, message }, { status: 500 });
+    console.error("GET /api/products failed", error);
+    return Response.json(
+      { success: false, message: "Failed to load products." },
+      { status: 500 },
+    );
   }
 }
