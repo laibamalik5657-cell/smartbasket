@@ -124,17 +124,6 @@ export const defaultCategories: Pick<
   },
 ];
 
-export async function seedCategories(): Promise<void> {
-  await connectToDatabase();
-
-  const count = await Category.countDocuments();
-  if (count > 0) {
-    return;
-  }
-
-  await Category.insertMany(defaultCategories);
-}
-
 export async function resetAndSeedCategories(): Promise<void> {
   await connectToDatabase();
   await Category.deleteMany({});
