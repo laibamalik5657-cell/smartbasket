@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import React, { useRef } from "react";
 
 export default function ShopByCategorySlider() {
@@ -133,11 +134,13 @@ export default function ShopByCategorySlider() {
               className="flex-shrink-0 w-[240px] sm:w-[280px] group cursor-pointer bg-white rounded-3xl border border-gray-100 shadow-sm p-5 flex flex-col items-center text-center justify-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
             >
               {/* BIGGER Image Container */}
-              <div className={`w-36 h-36 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mb-5 ${category.tint} overflow-hidden transition-transform group-hover:scale-105 shadow-inner`}>
-                <img 
-                  src={category.image} 
+              <div className={`relative w-36 h-36 sm:w-40 sm:h-40 rounded-full flex items-center justify-center mb-5 ${category.tint} overflow-hidden transition-transform group-hover:scale-105 shadow-inner`}>
+                <Image
+                  src={category.image}
                   alt={category.name}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 640px) 144px, 160px"
+                  className="object-cover"
                   loading="lazy"
                 />
               </div>
