@@ -10,7 +10,7 @@ import { useAuthGet } from "@/lib/use-api";
 type RiderOrder = {
   id: string;
   total: number;
-  status: "pending" | "assigned" | "delivered" | "cancelled";
+  status: "pending" | "assigned" | "out_for_delivery" | "delivered" | "cancelled";
   createdAt: string;
   customer: { name: string; phone: string; city: string; area: string; address: string };
 };
@@ -42,11 +42,13 @@ export default function RiderOrdersPage() {
   );
 }
 
-async function markDelivered(id: string) {
+async function updateStatus(id: string, status: "out_for_delivery" | "delivered") {
   try {
-    await apiClient.patch(`/rider/orders/${id}`, {}, {
-      headers: { Authorization: `Bearer ${getToken()}` },
-    });
+    await apiClient.patch(
+      `/rider/orders/${id}`,
+      { status },
+      { headers: { Authorization: `Bearer ${getToken()}` } },
+    );
     window.location.reload();
   } catch (err: unknown) {
     const message =
@@ -77,10 +79,20 @@ function DeliveriesList() {
             {o.customer.address}, {o.customer.area}, {o.customer.city}
           </p>
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">Status: {o.status}</span>
+            <span className="text-xs text-muted-foreground capitalize">
+              Status: {o.status.replace(/_/g, " ")}
+            </span>
             {o.status === "assigned" && (
               <button
-                onClick={() => markDelivered(o.id)}
+                onClick={() => updateStatus(o.id, "out_for_delivery")}
+                className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
+              >
+                Picked up
+              </button>
+            )}
+            {o.status === "out_for_delivery" && (
+              <button
+                onClick={() => updateStatus(o.id, "delivered")}
                 className="rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark"
               >
                 Mark delivered
