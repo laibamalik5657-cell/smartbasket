@@ -110,3 +110,34 @@ export const createOrderSchema = z.object({
 });
 
 export type CreateOrderInput = z.infer<typeof createOrderSchema>;
+
+export const createRiderSchema = z.object({
+  firstName: z.string().min(1, "First name is required."),
+  lastName: z.string().min(1, "Last name is required."),
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+export type CreateRiderInput = z.infer<typeof createRiderSchema>;
+
+// Admin action on an order: assign a rider (pending|assigned) or cancel (pending|assigned).
+export const assignOrderSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("assign"),
+    riderId: z.string().min(1, "A rider must be selected."),
+  }),
+  z.object({ action: z.literal("cancel") }),
+]);
+
+export type AssignOrderInput = z.infer<typeof assignOrderSchema>;
+
+export const orderStatusEnum = z.enum([
+  "pending",
+  "assigned",
+  "delivered",
+  "cancelled",
+]);
+
+export const orderStatusQuerySchema = z.object({
+  status: orderStatusEnum.optional(),
+});
