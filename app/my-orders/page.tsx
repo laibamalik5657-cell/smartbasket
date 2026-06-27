@@ -82,6 +82,9 @@ function OrdersList() {
                 <span className="text-sm font-medium text-foreground">
                   {order.id}
                 </span>
+                <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium capitalize text-gray-700">
+                  {(order as { status?: string }).status ?? "pending"}
+                </span>
                 <span className="text-sm font-bold text-foreground">
                   Rs. {order.total}
                 </span>
