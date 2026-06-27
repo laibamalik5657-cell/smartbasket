@@ -15,6 +15,7 @@ export interface JwtPayload {
   email: string;
   firstName: string;
   lastName: string;
+  role?: "user" | "admin" | "rider";
   iat?: number;
   exp?: number;
 }
@@ -65,5 +66,6 @@ export function userFromToken(token: string): User | null {
     email: payload.email,
     firstName: payload.firstName,
     lastName: payload.lastName,
+    role: payload.role ?? "user",
   };
 }
