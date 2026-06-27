@@ -2,8 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
-  // bcrypt is a native module — keep it external so Next doesn't try to bundle it.
-  serverExternalPackages: ["bcrypt"],
+  // bcrypt is a native module; nodemailer does dynamic requires — keep both
+  // external so Next doesn't try to bundle them.
+  serverExternalPackages: ["bcrypt", "nodemailer"],
   images: {
     remotePatterns: [
       {

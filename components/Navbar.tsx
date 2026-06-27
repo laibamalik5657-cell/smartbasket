@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { ChevronDown, LogOut, Package, User as UserIcon } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useAuthUser } from "@/lib/use-auth";
+import { deleteToken } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,14 +29,15 @@ const accountLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { cartCount, favCount, user, clearUser } = useStore();
+  const { cartCount, favCount } = useStore();
+  const user = useAuthUser();
 
   function handleLogout() {
-    clearUser();
+    deleteToken();
     setOpen(false);
-    router.push("/");
+    // Full navigation so every component re-reads the (now absent) token.
+    window.location.assign("/");
   }
 
   return (

@@ -4,14 +4,14 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
-import { useStore } from "@/lib/store";
+import type { Order } from "@/lib/store";
+import { useAuthGet } from "@/lib/use-api";
 
 function Confirmation() {
   const params = useSearchParams();
   const id = params.get("id");
-  const { getOrder } = useStore();
-
-  const order = id ? getOrder(id) : undefined;
+  const data = useAuthGet<{ order: Order }>(id ? `/orders/${id}` : "");
+  const order = data?.order;
 
   if (!order) {
     return (
@@ -28,14 +28,7 @@ function Confirmation() {
     );
   }
 
-  // Legacy orders saved before the shipping/total update may be missing these fields.
-  const subtotal =
-    order.subtotal ??
-    order.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shipping =
-    order.shipping ??
-    (subtotal > 500 || subtotal === 0 ? 0 : 50);
-  const total = order.total ?? subtotal + shipping;
+  const { subtotal, shipping, total } = order;
 
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border p-8">

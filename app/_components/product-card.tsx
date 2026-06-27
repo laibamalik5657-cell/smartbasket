@@ -63,12 +63,12 @@ export default function ProductCard({ product }: { product: FeaturedProduct }) {
       </div>
       <div className="mt-3 flex flex-1 flex-col">
         <h3 className="text-sm font-semibold text-foreground">{product.name}</h3>
-        <p className="text-xs text-muted">In stock</p>
+        <p className="text-xs text-muted-foreground">In stock</p>
         <div className="mt-3 flex items-center justify-between">
           <p className="text-base font-bold text-gray-900">
             Rs.{product.price}
             {product.unit && (
-              <span className="ml-1 text-xs font-normal text-muted">{product.unit}</span>
+              <span className="ml-1 text-xs font-normal text-muted-foreground">{product.unit}</span>
             )}
           </p>
           <button

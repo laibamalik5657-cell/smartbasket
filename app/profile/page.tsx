@@ -1,19 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isAxiosError } from "axios";
 import { LogOut, Pencil, User as UserIcon } from "lucide-react";
 
 import apiClient from "@/lib/axios";
-import { useStore } from "@/lib/store";
-import { userFromToken } from "@/lib/decode-jwt";
+import { useAuthUser } from "@/lib/use-auth";
+import { deleteToken, getToken, saveToken } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
 export default function ProfilePage() {
-  const router = useRouter();
-  const { user, token, setUser, setToken, clearUser } = useStore();
+  const user = useAuthUser();
 
   const [editing, setEditing] = useState(false);
   const [firstName, setFirstName] = useState("");
@@ -25,8 +23,9 @@ export default function ProfilePage() {
   } | null>(null);
 
   function handleLogout() {
-    clearUser();
-    router.push("/");
+    deleteToken();
+    // Full navigation so the navbar re-reads the (now absent) token.
+    window.location.assign("/");
   }
 
   function startEditing() {
@@ -56,13 +55,14 @@ export default function ProfilePage() {
       const { data } = await apiClient.patch(
         "/user",
         { firstName: firstName.trim(), lastName: lastName.trim() },
-        { headers: { Authorization: `Bearer ${token ?? ""}` } },
+        { headers: { Authorization: `Bearer ${getToken() ?? ""}` } },
       );
       if (data?.token) {
-        setToken(data.token);
-        setUser(userFromToken(data.token) ?? data.user ?? null);
-      } else if (data?.user) {
-        setUser(data.user);
+        // Save the re-issued token, then reload so the new name shows in the
+        // navbar and here (the user is derived from the token).
+        saveToken(data.token);
+        window.location.reload();
+        return;
       }
       setEditing(false);
       setMessage({ type: "success", text: "Profile updated." });

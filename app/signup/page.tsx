@@ -9,7 +9,6 @@ import { isAxiosError } from "axios";
 import { Eye, EyeOff } from "lucide-react";
 
 import { signupFormSchema, type SignupFormInput } from "@/schema";
-import { useStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,7 +23,6 @@ import apiClient from "@/lib/axios";
 
 export default function SignupPage() {
   const router = useRouter();
-  const { setUser } = useStore();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState<{
@@ -46,17 +44,15 @@ export default function SignupPage() {
   async function onSubmit(values: SignupFormInput) {
     setMessage(null);
     try {
-      const { data } = await apiClient.post("/auth/register", {
+      await apiClient.post("/auth/register", {
         firstName: values.firstName,
         lastName: values.lastName,
         email: values.email,
         password: values.password,
       });
-      if (data?.user) {
-        setUser(data.user);
-      }
-      setMessage({ type: "success", text: "Account created successfully." });
-      router.push("/");
+      // Registration doesn't start a session — send them to sign in.
+      setMessage({ type: "success", text: "Account created. Please sign in." });
+      router.push("/login");
     } catch (err) {
       const text = isAxiosError(err)
         ? err.response?.data?.message || "Account creation failed."
