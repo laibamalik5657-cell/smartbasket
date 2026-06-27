@@ -43,10 +43,17 @@ export default function RiderOrdersPage() {
 }
 
 async function markDelivered(id: string) {
-  await apiClient.patch(`/rider/orders/${id}`, {}, {
-    headers: { Authorization: `Bearer ${getToken()}` },
-  });
-  window.location.reload();
+  try {
+    await apiClient.patch(`/rider/orders/${id}`, {}, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    window.location.reload();
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      "Something went wrong. Please try again.";
+    alert(message);
+  }
 }
 
 function DeliveriesList() {

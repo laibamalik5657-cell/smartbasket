@@ -59,10 +59,17 @@ function Denied() {
 }
 
 async function patchOrder(id: string, body: object) {
-  await apiClient.patch(`/admin/orders/${id}`, body, {
-    headers: { Authorization: `Bearer ${getToken()}` },
-  });
-  window.location.reload();
+  try {
+    await apiClient.patch(`/admin/orders/${id}`, body, {
+      headers: { Authorization: `Bearer ${getToken()}` },
+    });
+    window.location.reload();
+  } catch (err: unknown) {
+    const message =
+      (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
+      "Something went wrong. Please try again.";
+    alert(message);
+  }
 }
 
 function OrdersTable() {
