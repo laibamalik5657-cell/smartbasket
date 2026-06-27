@@ -4,9 +4,20 @@ import { Product, IProduct } from "@/models/Product";
 export async function GET(request: Request) {
   try {
     await connectToDatabase();
-    const category = new URL(request.url).searchParams.get("category");
-    const query =
-      category && category !== "All" ? { category } : {};
+    const params = new URL(request.url).searchParams;
+    const category = params.get("category");
+    const q = params.get("q");
+
+    const query: Record<string, unknown> = {};
+    if (category && category !== "All") {
+      query.category = category;
+    }
+    if (q && q.trim()) {
+      // Escape regex metacharacters so user input can't break (or abuse) the query.
+      const escaped = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      query.name = { $regex: escaped, $options: "i" };
+    }
+
     const docs = await Product.find(query).sort({ order: 1 }).lean<IProduct[]>();
     const products = docs.map((p) => ({
       id: p.slug,

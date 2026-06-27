@@ -1,20 +1,8 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import { connectToDatabase } from "@/lib/mongodb";
 import { User, IUser } from "@/models/User";
+import { signToken } from "@/lib/auth";
 import { loginSchema } from "@/schema";
-
-// Require a real secret — never fall back to a hardcoded default (forgeable tokens).
-// Generate one with `openssl rand -base64 48` and set JWT_SECRET in the environment.
-// Resolved at module load so a missing secret fails fast at startup, not per-request.
-const JWT_SECRET: string = (() => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET must be set");
-  }
-  return secret;
-})();
-const JWT_EXPIRES_IN = "7d";
 
 export async function POST(request: Request) {
   await connectToDatabase();
@@ -48,11 +36,10 @@ export async function POST(request: Request) {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
+      role: user.role ?? "user",
     };
 
-    const token = jwt.sign(userInfo, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
+    const token = signToken(userInfo);
 
     return Response.json(
       {

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import CategorySlider from "./_components/category-slider";
 import ProductCard, { type FeaturedProduct } from "./_components/product-card";
+import SearchBox from "./_components/search-box";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Category, ICategory } from "@/models/Category";
 import { Product, IProduct } from "@/models/Product";
@@ -133,33 +134,9 @@ export default async function Home() {
               pantry staples — handpicked daily and delivered to your door.
             </p>
 
-            <form className="mt-8 flex max-w-md items-center gap-2 rounded-full bg-white p-1.5 shadow-sm ring-1 ring-border focus-within:ring-brand">
-              <span className="pl-3">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                placeholder="Search for fruits, snacks, drinks…"
-                className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-brand-dark"
-              >
-                Search
-              </button>
-            </form>
+            <div className="mt-8">
+              <SearchBox />
+            </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
               <div className="flex items-center gap-2">

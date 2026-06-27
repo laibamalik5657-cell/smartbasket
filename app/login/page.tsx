@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,12 +19,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import apiClient from "@/lib/axios";
-import { useStore } from "@/lib/store";
-import { userFromToken } from "@/lib/decode-jwt";
+import { saveToken } from "@/lib/utils";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const { setUser, setToken } = useStore();
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<{
     type: "error" | "success";
@@ -42,14 +38,12 @@ export default function LoginPage() {
     try {
       const { data } = await apiClient.post("/auth/login", values);
       if (data?.token) {
-        // Store the JWT, then derive the user from it (see lib/decode-jwt).
-        setToken(data.token);
-        setUser(userFromToken(data.token) ?? data.user ?? null);
-      } else if (data?.user) {
-        setUser(data.user);
+        // The JWT is the whole session — save it, then full-navigate home so
+        // the navbar (and everything else) re-reads it. The user is decoded
+        // from this token wherever it's needed (see lib/use-auth).
+        saveToken(data.token);
       }
-      setMessage({ type: "success", text: "Signed in successfully." });
-      router.push("/");
+      window.location.assign("/");
     } catch (err) {
       const text = isAxiosError(err)
         ? err.response?.data?.message || "Sign in failed."

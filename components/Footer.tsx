@@ -23,7 +23,7 @@ export default function Footer() {
             </span>
             <span className="text-base font-bold">SmartBasket</span>
           </div>
-          <p className="mt-3 text-sm text-muted">
+          <p className="mt-3 text-sm text-muted-foreground">
             Fresh groceries delivered to your door in minutes. Quality you can
             taste, prices you will love.
           </p>
@@ -31,7 +31,7 @@ export default function Footer() {
 
         <div>
           <h4 className="text-sm font-semibold">Shop</h4>
-          <ul className="mt-3 space-y-2 text-sm text-muted">
+          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li><Link href="/" className="hover:text-brand">Fruits & Vegetables</Link></li>
             <li><Link href="/" className="hover:text-brand">Dairy & Eggs</Link></li>
             <li><Link href="/" className="hover:text-brand">Bakery</Link></li>
@@ -41,7 +41,7 @@ export default function Footer() {
 
         <div>
           <h4 className="text-sm font-semibold">Company</h4>
-          <ul className="mt-3 space-y-2 text-sm text-muted">
+          <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
             <li><Link href="/about" className="hover:text-brand">About Us</Link></li>
             <li><Link href="/contact" className="hover:text-brand">Contact Us</Link></li>
             <li><Link href="/" className="hover:text-brand">Careers</Link></li>
@@ -51,7 +51,7 @@ export default function Footer() {
 
         <div>
           <h4 className="text-sm font-semibold">Stay in the loop</h4>
-          <p className="mt-3 text-sm text-muted">
+          <p className="mt-3 text-sm text-muted-foreground">
             Get weekly deals and seasonal recipes in your inbox.
           </p>
           <form className="mt-3 flex gap-2">
@@ -70,7 +70,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="border-t border-border">
-        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-muted sm:flex-row sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row sm:px-6 lg:px-8">
           <p>© {new Date().getFullYear()} SmartBasket. All rights reserved.</p>
           <div className="flex gap-4">
             <Link href="/" className="hover:text-brand">Privacy</Link>

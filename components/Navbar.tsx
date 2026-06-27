@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ChevronDown, LogOut, Package, User as UserIcon } from "lucide-react";
+import { ChevronDown, LayoutDashboard, LogOut, Package, Truck, User as UserIcon } from "lucide-react";
 import { useStore } from "@/lib/store";
+import { useAuthUser } from "@/lib/use-auth";
+import { deleteToken } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,14 +29,15 @@ const accountLinks = [
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { cartCount, favCount, user, clearUser } = useStore();
+  const { cartCount, favCount } = useStore();
+  const user = useAuthUser();
 
   function handleLogout() {
-    clearUser();
+    deleteToken();
     setOpen(false);
-    router.push("/");
+    // Full navigation so every component re-reads the (now absent) token.
+    window.location.assign("/");
   }
 
   return (
@@ -161,6 +164,22 @@ export default function Navbar() {
                     </Link>
                   </DropdownMenuItem>
                 ))}
+                {user?.role === "admin" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin/orders">
+                      <LayoutDashboard className="opacity-70" />
+                      Admin
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                {user?.role === "rider" && (
+                  <DropdownMenuItem asChild>
+                    <Link href="/rider/orders">
+                      <Truck className="opacity-70" />
+                      My Deliveries
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem variant="destructive" onSelect={handleLogout}>
                   <LogOut />
@@ -308,6 +327,26 @@ export default function Navbar() {
                     {label}
                   </Link>
                 ))}
+                {user?.role === "admin" && (
+                  <Link
+                    href="/admin/orders"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-surface"
+                  >
+                    <LayoutDashboard className="h-4 w-4 opacity-70" />
+                    Admin
+                  </Link>
+                )}
+                {user?.role === "rider" && (
+                  <Link
+                    href="/rider/orders"
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-foreground hover:bg-surface"
+                  >
+                    <Truck className="h-4 w-4 opacity-70" />
+                    My Deliveries
+                  </Link>
+                )}
                 <button
                   type="button"
                   onClick={handleLogout}

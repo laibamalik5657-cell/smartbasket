@@ -1,36 +1,20 @@
-import jwt from "jsonwebtoken";
 import { connectToDatabase } from "@/lib/mongodb";
 import { User, IUser } from "@/models/User";
+import { getAuthUser, signToken } from "@/lib/auth";
 import { updateProfileSchema } from "@/schema";
-
-// Resolved at module load so a missing secret fails fast at startup, not per-request.
-const JWT_SECRET: string = (() => {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) {
-    throw new Error("JWT_SECRET must be set");
-  }
-  return secret;
-})();
-const JWT_EXPIRES_IN = "7d";
 
 export async function PATCH(request: Request) {
   await connectToDatabase();
 
   // Authenticate via the Bearer JWT (the only session we have).
-  const authHeader = request.headers.get("authorization") ?? "";
-  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
-
-  let userId: string;
-  try {
-    const payload = jwt.verify(token, JWT_SECRET) as { id?: string };
-    if (!payload.id) throw new Error("Missing subject");
-    userId = payload.id;
-  } catch {
+  const authUser = getAuthUser(request);
+  if (!authUser) {
     return Response.json(
       { success: false, message: "Unauthorized." },
       { status: 401 },
     );
   }
+  const userId = authUser.id;
 
   try {
     const body = await request.json();
@@ -65,10 +49,9 @@ export async function PATCH(request: Request) {
       firstName: updated.firstName,
       lastName: updated.lastName,
       email: updated.email,
+      role: updated.role ?? "user",
     };
-    const newToken = jwt.sign(userInfo, JWT_SECRET, {
-      expiresIn: JWT_EXPIRES_IN,
-    });
+    const newToken = signToken(userInfo);
 
     return Response.json(
       {
