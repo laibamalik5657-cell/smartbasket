@@ -40,8 +40,12 @@ export function getAuthUser(request: Request): AuthUser | null {
   const token = header.startsWith("Bearer ") ? header.slice(7) : "";
   if (!token) return null;
   try {
-    const payload = jwt.verify(token, JWT_SECRET) as AuthUser;
-    return payload.id ? payload : null;
+    // Legacy tokens issued before `role` existed verify fine but lack the
+    // claim — default it so the returned object always conforms to AuthUser.
+    const payload = jwt.verify(token, JWT_SECRET) as AuthUser & {
+      role?: AuthUser["role"];
+    };
+    return payload.id ? { ...payload, role: payload.role ?? "user" } : null;
   } catch {
     return null;
   }
