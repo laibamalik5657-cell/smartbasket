@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { Package } from "lucide-react";
 import type { Order } from "@/lib/store";
+import { statusLabel, type OrderStatus } from "@/lib/tracking";
 import { useAuthUser } from "@/lib/use-auth";
 import { useAuthGet } from "@/lib/use-api";
 
@@ -83,7 +84,7 @@ function OrdersList() {
                   {order.id}
                 </span>
                 <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium capitalize text-gray-700">
-                  {(order as { status?: string }).status ?? "pending"}
+                  {statusLabel(((order as { status?: OrderStatus }).status ?? "pending"))}
                 </span>
                 <span className="text-sm font-bold text-foreground">
                   Rs. {order.total}

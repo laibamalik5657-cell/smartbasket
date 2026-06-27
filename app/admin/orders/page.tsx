@@ -10,7 +10,7 @@ import { useAuthGet } from "@/lib/use-api";
 type AdminOrder = {
   id: string;
   total: number;
-  status: "pending" | "assigned" | "delivered" | "cancelled";
+  status: "pending" | "assigned" | "out_for_delivery" | "delivered" | "cancelled";
   riderId: string | null;
   riderName: string | null;
   createdAt: string;
@@ -21,6 +21,7 @@ type Rider = { id: string; firstName: string; lastName: string };
 const STATUS_STYLES: Record<AdminOrder["status"], string> = {
   pending: "bg-yellow-100 text-yellow-800",
   assigned: "bg-blue-100 text-blue-800",
+  out_for_delivery: "bg-indigo-100 text-indigo-800",
   delivered: "bg-green-100 text-green-800",
   cancelled: "bg-red-100 text-red-800",
 };
@@ -103,7 +104,7 @@ function OrdersTable() {
               <td className="p-3">Rs. {o.total}</td>
               <td className="p-3">
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[o.status]}`}>
-                  {o.status}
+                  {o.status.replace(/_/g, " ")}
                 </span>
               </td>
               <td className="p-3">{o.riderName ?? "—"}</td>
