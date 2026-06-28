@@ -1,5 +1,5 @@
-import { connectToDatabase } from "@/lib/mongodb";
-import { Category, ICategory } from "@/models/Category";
+import { connectToDatabase } from "../mongodb";
+import { Category, ICategory } from "../../models/Category";
 
 export const defaultCategories: Pick<
   ICategory,
@@ -123,17 +123,6 @@ export const defaultCategories: Pick<
     count: "25+ Items",
   },
 ];
-
-export async function seedCategories(): Promise<void> {
-  await connectToDatabase();
-
-  const count = await Category.countDocuments();
-  if (count > 0) {
-    return;
-  }
-
-  await Category.insertMany(defaultCategories);
-}
 
 export async function resetAndSeedCategories(): Promise<void> {
   await connectToDatabase();

@@ -1,18 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
-
+import { Eye, EyeOff } from "lucide-react";
 
 import { signupFormSchema, type SignupFormInput } from "@/schema";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -25,6 +23,8 @@ import apiClient from "@/lib/axios";
 
 export default function SignupPage() {
   const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
@@ -38,7 +38,6 @@ export default function SignupPage() {
       email: "",
       password: "",
       confirmPassword: "",
-      agreed: false,
     },
   });
 
@@ -51,8 +50,9 @@ export default function SignupPage() {
         email: values.email,
         password: values.password,
       });
-      setMessage({ type: "success", text: "Account created successfully." });
-      router.push("/");
+      // Registration doesn't start a session — send them to sign in.
+      setMessage({ type: "success", text: "Account created. Please sign in." });
+      router.push("/login");
     } catch (err) {
       const text = isAxiosError(err)
         ? err.response?.data?.message || "Account creation failed."
@@ -129,11 +129,26 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Create password"
-                      {...field}
-                    />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Create password"
+                        className="pr-9"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -147,34 +162,27 @@ export default function SignupPage() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="Confirm password"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="agreed"
-              render={({ field }) => (
-                <FormItem>
-                  <div className="flex items-start gap-2">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        className="mt-0.5"
+                    <div className="relative">
+                      <Input
+                        type={showConfirm ? "text" : "password"}
+                        placeholder="Confirm password"
+                        className="pr-9"
+                        {...field}
                       />
-                    </FormControl>
-                    <FormLabel className="text-sm font-normal leading-snug text-gray-600">
-                      I agree to the Terms &amp; Conditions and Privacy Policy
-                    </FormLabel>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirm((v) => !v)}
+                        aria-label={showConfirm ? "Hide password" : "Show password"}
+                        className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {showConfirm ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
@@ -201,28 +209,6 @@ export default function SignupPage() {
             </Button>
           </form>
         </Form>
-
-        {/* Divider */}
-        <div className="my-5 flex items-center gap-3">
-          <span className="h-px flex-1 bg-gray-300" />
-          <span className="text-sm text-gray-500">OR</span>
-          <span className="h-px flex-1 bg-gray-300" />
-        </div>
-
-        {/* Google Signup */}
-        <Button
-          type="button"
-          variant="outline"
-          className="h-auto w-full gap-3 rounded-lg py-2.5 text-sm font-medium"
-        >
-          <Image
-            src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-            alt="Google"
-            width={20}
-            height={20}
-          />
-          Continue with Google
-        </Button>
 
         <p className="mt-5 text-center text-sm text-gray-500">
           Already have an account?{" "}

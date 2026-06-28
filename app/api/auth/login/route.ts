@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { connectToDatabase } from "@/lib/mongodb";
 import { User, IUser } from "@/models/User";
+import { signToken } from "@/lib/auth";
 import { loginSchema } from "@/schema";
 
 export async function POST(request: Request) {
@@ -30,15 +31,23 @@ export async function POST(request: Request) {
       );
     }
 
+    const userInfo = {
+      id: user._id.toString(),
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      role: user.role ?? "user",
+    };
+
+    const token = signToken(userInfo);
+
     return Response.json(
       {
         success: true,
         message: "Signed in successfully.",
+        token,
         user: {
-          id: user._id.toString(),
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
+          ...userInfo,
           createdAt:
             user.createdAt instanceof Date
               ? user.createdAt.toISOString()

@@ -4,14 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { isAxiosError } from "axios";
 import { useStore } from "@/lib/store";
+import { useAuthUser } from "@/lib/use-auth";
+import apiClient from "@/lib/axios";
+import { getToken } from "@/lib/utils";
 
 export default function CartPage() {
   const router = useRouter();
-  const { cart, updateQty, removeFromCart, placeOrder } = useStore();
+  const user = useAuthUser();
+  const { cart, updateQty, removeFromCart, clearCart } = useStore();
 
   const [checkout, setCheckout] = useState(false);
   const [payment, setPayment] = useState("cod");
+  const [placing, setPlacing] = useState(false);
   const [customer, setCustomer] = useState({
     name: "",
     phone: "",
@@ -21,6 +27,15 @@ export default function CartPage() {
   });
   const [error, setError] = useState("");
 
+  // Checkout requires an account — orders are saved per user.
+  const startCheckout = () => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
+    setCheckout(true);
+  };
+
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const shipping = subtotal > 500 || subtotal === 0 ? 0 : 50;
   const total = subtotal + shipping;
@@ -28,7 +43,7 @@ export default function CartPage() {
   const setField = (field: keyof typeof customer, value: string) =>
     setCustomer((prev) => ({ ...prev, [field]: value }));
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     const trimmed = {
       name: customer.name.trim(),
       phone: customer.phone.trim(),
@@ -54,8 +69,27 @@ export default function CartPage() {
     }
 
     setError("");
-    const order = placeOrder({ payment, customer: trimmed });
-    router.push(`/order-confirmation?id=${order.id}`);
+    setPlacing(true);
+    try {
+      const { data } = await apiClient.post(
+        "/orders",
+        { items: cart, payment, customer: trimmed },
+        { headers: { Authorization: `Bearer ${getToken() ?? ""}` } },
+      );
+      clearCart();
+      router.push(`/order-confirmation?id=${data.order.id}`);
+    } catch (err) {
+      if (isAxiosError(err) && err.response?.status === 401) {
+        router.push("/login");
+        return;
+      }
+      setError(
+        isAxiosError(err)
+          ? err.response?.data?.message || "Failed to place order."
+          : "Something went wrong. Please try again.",
+      );
+      setPlacing(false);
+    }
   };
 
   /* EMPTY CART */
@@ -189,13 +223,15 @@ export default function CartPage() {
 
                 <button
                   onClick={handlePlaceOrder}
-                  className="w-full mt-6 bg-brand hover:bg-brand-dark text-white py-3 rounded-lg font-medium"
+                  disabled={placing}
+                  className="w-full mt-6 bg-brand hover:bg-brand-dark text-white py-3 rounded-lg font-medium disabled:opacity-60"
                 >
-                  Place Order
+                  {placing ? "Placing order..." : "Place Order"}
                 </button>
                 <button
                   onClick={() => setCheckout(false)}
-                  className="w-full mt-2 text-muted-foreground py-2 text-sm hover:text-foreground"
+                  disabled={placing}
+                  className="w-full mt-2 text-muted-foreground py-2 text-sm hover:text-foreground disabled:opacity-60"
                 >
                   ← Back to cart
                 </button>
@@ -270,7 +306,7 @@ export default function CartPage() {
 
         <button
           className="w-full mt-4 bg-brand text-white py-2 rounded-lg hover:bg-brand-dark"
-          onClick={() => setCheckout(true)}
+          onClick={startCheckout}
         >
           Checkout
         </button>

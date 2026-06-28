@@ -5,7 +5,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
-import api from "@/lib/axios";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +51,7 @@ export default function ForgotPasswordPage() {
       <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-md items-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="w-full rounded-3xl border border-border bg-white p-8 shadow-sm sm:p-10">
           <h1 className="text-2xl font-bold sm:text-3xl">Reset your password</h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-muted-foreground">
             Enter your email and we&apos;ll send you a link to get back in.
           </p>
 
@@ -92,7 +91,7 @@ export default function ForgotPasswordPage() {
             </form>
           </Form>
 
-          <p className="mt-6 text-center text-sm text-muted">
+          <p className="mt-6 text-center text-sm text-muted-foreground">
             Remember your password?{" "}
             <Link href="/login" className="font-medium text-brand hover:underline">
               Sign in

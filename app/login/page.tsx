@@ -1,12 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { isAxiosError } from "axios";
+import { Eye, EyeOff } from "lucide-react";
 
 import { loginSchema, type LoginInput } from "@/schema";
 import { Button } from "@/components/ui/button";
@@ -20,9 +19,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import apiClient from "@/lib/axios";
+import { saveToken } from "@/lib/utils";
 
 export default function LoginPage() {
-  const router = useRouter();
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<{
     type: "error" | "success";
     text: string;
@@ -36,9 +36,14 @@ export default function LoginPage() {
   async function onSubmit(values: LoginInput) {
     setMessage(null);
     try {
-      await apiClient.post("/auth/login", values);
-      setMessage({ type: "success", text: "Signed in successfully." });
-      router.push("/");
+      const { data } = await apiClient.post("/auth/login", values);
+      if (data?.token) {
+        // The JWT is the whole session — save it, then full-navigate home so
+        // the navbar (and everything else) re-reads it. The user is decoded
+        // from this token wherever it's needed (see lib/use-auth).
+        saveToken(data.token);
+      }
+      window.location.assign("/");
     } catch (err) {
       const text = isAxiosError(err)
         ? err.response?.data?.message || "Sign in failed."
@@ -52,13 +57,18 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="w-full max-w-2xl rounded-3xl bg-white p-8 shadow-lg">
-        <h1 className="text-3xl font-bold text-center">Welcome to SmartBasket</h1>
+        <h1 className="text-3xl font-bold text-center">
+          Welcome to SmartBasket
+        </h1>
         <p className="mt-2 text-center text-gray-500">
           Sign in to continue shopping
         </p>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mt-8 space-y-4"
+          >
             <FormField
               control={form.control}
               name="email"
@@ -66,7 +76,11 @@ export default function LoginPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} />
+                    <Input
+                      type="email"
+                      placeholder="you@example.com"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -88,7 +102,26 @@ export default function LoginPage() {
                     </Link>
                   </div>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} />
+                    <div className="relative">
+                      <Input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="••••••••"
+                        className="pr-9"
+                        {...field}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        className="absolute inset-y-0 right-0 flex items-center pr-2.5 text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,31 +150,12 @@ export default function LoginPage() {
           </form>
         </Form>
 
-        {/* Divider */}
-        <div className="my-6 flex items-center gap-3">
-          <span className="h-px flex-1 bg-gray-300" />
-          <span className="text-sm text-gray-500">OR</span>
-          <span className="h-px flex-1 bg-gray-300" />
-        </div>
-
-        {/* Google Login */}
-        <Button
-          type="button"
-          variant="outline"
-          className="h-auto w-full gap-3 rounded-lg py-3 text-base font-medium"
-        >
-          <Image
-            src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg"
-            alt="Google"
-            width={20}
-            height={20}
-          />
-          Continue with Google
-        </Button>
-
         <p className="mt-6 text-center text-sm text-gray-500">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-medium text-green-600 hover:underline">
+          <Link
+            href="/signup"
+            className="font-medium text-green-600 hover:underline"
+          >
             Create Account
           </Link>
         </p>

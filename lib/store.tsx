@@ -24,6 +24,9 @@ export interface OrderCustomer {
   address: string;
 }
 
+/* Orders are persisted server-side per user (see app/api/orders + models/Order),
+ * NOT in this store. This type is the plain shape the API returns and the
+ * order pages render. */
 export interface Order {
   id: string;
   items: CartLine[];
@@ -35,9 +38,21 @@ export interface Order {
   createdAt: string;
 }
 
+/* The signed-in user is NOT kept here — it lives in the JWT in localStorage.
+ * Save/read/clear the token with lib/utils, and read the current user
+ * reactively with useAuthUser() (lib/use-auth). This type is the decoded
+ * shape, re-exported for those helpers. */
+export interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: "user" | "admin" | "rider";
+  createdAt?: string;
+}
+
 const CART_KEY = "smartbasket:cart";
 const FAV_KEY = "smartbasket:favorites";
-const ORDERS_KEY = "smartbasket:orders";
 
 function readRaw<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -52,7 +67,6 @@ function readRaw<T>(key: string, fallback: T): T {
 /* Stable empty snapshots (used on the server and before any writes). */
 const EMPTY_CART: CartLine[] = [];
 const EMPTY_FAV: Product[] = [];
-const EMPTY_ORDERS: Order[] = [];
 
 /*
  * localStorage acts as the external store. We cache the parsed value so
@@ -61,12 +75,10 @@ const EMPTY_ORDERS: Order[] = [];
  */
 let cartCache: CartLine[] = EMPTY_CART;
 let favCache: Product[] = EMPTY_FAV;
-let ordersCache: Order[] = EMPTY_ORDERS;
 
 function loadCaches() {
   cartCache = readRaw<CartLine[]>(CART_KEY, EMPTY_CART);
   favCache = readRaw<Product[]>(FAV_KEY, EMPTY_FAV);
-  ordersCache = readRaw<Order[]>(ORDERS_KEY, EMPTY_ORDERS);
 }
 
 if (typeof window !== "undefined") loadCaches();
@@ -107,12 +119,6 @@ function setFav(next: Product[]) {
   emit();
 }
 
-function setOrders(next: Order[]) {
-  ordersCache = next;
-  persist(ORDERS_KEY, next);
-  emit();
-}
-
 /* Kept so existing <StoreProvider> in the layout keeps working — the store
  * itself is module-level, so this is just a passthrough. */
 export function StoreProvider({ children }: { children: ReactNode }) {
@@ -129,11 +135,6 @@ export function useStore() {
     subscribe,
     () => favCache,
     () => EMPTY_FAV,
-  );
-  const orders = useSyncExternalStore(
-    subscribe,
-    () => ordersCache,
-    () => EMPTY_ORDERS,
   );
 
   const addToCart = useCallback((product: Product, qty = 1) => {
@@ -176,46 +177,12 @@ export function useStore() {
     [favorites],
   );
 
-  const placeOrder = useCallback(
-    ({
-      payment,
-      customer,
-    }: {
-      payment: string;
-      customer: OrderCustomer;
-    }): Order => {
-      const subtotal = cartCache.reduce((sum, i) => sum + i.price * i.quantity, 0);
-      const shipping = subtotal > 500 || subtotal === 0 ? 0 : 50;
-      const total = subtotal + shipping;
-      const order: Order = {
-        id: `ORD-${Date.now()}`,
-        items: cartCache,
-        subtotal,
-        shipping,
-        total,
-        payment,
-        customer,
-        createdAt: new Date().toISOString(),
-      };
-      setOrders([order, ...ordersCache]);
-      setCart(EMPTY_CART);
-      return order;
-    },
-    [],
-  );
-
-  const getOrder = useCallback(
-    (id: string) => orders.find((o) => o.id === id),
-    [orders],
-  );
-
   const cartCount = cart.reduce((sum, i) => sum + i.quantity, 0);
   const favCount = favorites.length;
 
   return {
     cart,
     favorites,
-    orders,
     cartCount,
     favCount,
     addToCart,
@@ -224,7 +191,5 @@ export function useStore() {
     clearCart,
     toggleFavourite,
     isFavourite,
-    placeOrder,
-    getOrder,
   };
 }

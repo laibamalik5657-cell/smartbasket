@@ -1,17 +1,40 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CheckCircle2 } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { useOrderTracking } from "@/lib/use-order";
+import {
+  STORE_COORD,
+  destinationFor,
+  deliveryProgress,
+  type Coord,
+} from "@/lib/tracking";
+import StatusStepper from "./_components/StatusStepper";
+import EtaBanner from "./_components/EtaBanner";
+
+const DeliveryMap = dynamic(() => import("./_components/DeliveryMap"), {
+  ssr: false,
+  loading: () => <div className="h-64 w-full animate-pulse rounded-xl bg-surface" />,
+});
 
 function Confirmation() {
   const params = useSearchParams();
   const id = params.get("id");
-  const { getOrder } = useStore();
+  const { order, loading, now } = useOrderTracking(id);
 
-  const order = id ? getOrder(id) : undefined;
+  // Stable coordinates for the map (recomputing would re-init the map each render).
+  const destination = useMemo<Coord>(
+    () => (order ? destinationFor(order) : STORE_COORD),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [order?.id],
+  );
+
+  if (loading) {
+    return <p className="text-center text-gray-500 py-20">Loading…</p>;
+  }
 
   if (!order) {
     return (
@@ -28,25 +51,44 @@ function Confirmation() {
     );
   }
 
-  // Legacy orders saved before the shipping/total update may be missing these fields.
-  const subtotal =
-    order.subtotal ??
-    order.items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const shipping =
-    order.shipping ??
-    (subtotal > 500 || subtotal === 0 ? 0 : 50);
-  const total = order.total ?? subtotal + shipping;
+  const cancelled = order.status === "cancelled";
+  const showMap = order.status === "assigned" || order.status === "out_for_delivery" || order.status === "delivered";
+  const progress = deliveryProgress(order, now);
 
   return (
     <div className="bg-card rounded-2xl shadow-sm border border-border p-8">
       <div className="text-center border-b border-border pb-6">
-        <CheckCircle2 className="w-16 h-16 text-brand mx-auto mb-3" aria-hidden="true" />
-        <h1 className="text-2xl font-bold text-foreground">Order placed!</h1>
+        {cancelled ? (
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-3" aria-hidden="true" />
+        ) : (
+          <CheckCircle2 className="w-16 h-16 text-brand mx-auto mb-3" aria-hidden="true" />
+        )}
+        <h1 className="text-2xl font-bold text-foreground">
+          {cancelled ? "Order cancelled" : "Order placed!"}
+        </h1>
         <p className="mt-1 text-muted-foreground">
-          Thank you, {order.customer.name}. Your order is confirmed.
+          {cancelled
+            ? "This order was cancelled."
+            : `Thank you, ${order.customer.name}. Your order is confirmed.`}
         </p>
         <p className="mt-2 text-sm font-medium text-foreground">Order ID: {order.id}</p>
       </div>
+
+      {/* Live tracker */}
+      {!cancelled && (
+        <div className="py-6 space-y-5 border-b border-border">
+          <StatusStepper status={order.status} />
+          <EtaBanner order={order} now={now} />
+          {showMap && (
+            <DeliveryMap
+              store={STORE_COORD}
+              destination={destination}
+              progress={progress}
+              status={order.status}
+            />
+          )}
+        </div>
+      )}
 
       {/* Items */}
       <div className="py-6 space-y-3">
@@ -64,15 +106,15 @@ function Confirmation() {
       <div className="border-t border-border pt-4 space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Items</span>
-          <span>Rs. {subtotal}</span>
+          <span>Rs. {order.subtotal}</span>
         </div>
         <div className="flex justify-between">
           <span className="text-muted-foreground">Delivery</span>
-          <span>Rs. {shipping}</span>
+          <span>Rs. {order.shipping}</span>
         </div>
         <div className="flex justify-between font-bold text-lg pt-2 border-t border-border">
           <span>Total</span>
-          <span>Rs. {total}</span>
+          <span>Rs. {order.total}</span>
         </div>
       </div>
 
@@ -84,8 +126,7 @@ function Confirmation() {
         </p>
         <p>Phone: {order.customer.phone}</p>
         <p className="mt-2">
-          Payment:{" "}
-          {order.payment === "cod" ? "Cash on Delivery" : "Online Payment"}
+          Payment: {order.payment === "cod" ? "Cash on Delivery" : "Online Payment"}
         </p>
       </div>
 

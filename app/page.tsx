@@ -1,21 +1,12 @@
 import Link from "next/link";
 import CategorySlider from "./_components/category-slider";
 import ProductCard, { type FeaturedProduct } from "./_components/product-card";
-import { seedCategories } from "@/lib/seed/categories";
+import SearchBox from "./_components/search-box";
+import { connectToDatabase } from "@/lib/mongodb";
 import { Category, ICategory } from "@/models/Category";
+import { Product, IProduct } from "@/models/Product";
 
 export const dynamic = "force-dynamic";
-
-const products: FeaturedProduct[] = [
-  { id: "bananas", name: "Bananas", price: 250, unit: "/ dozen", image: "/products/bananas.png", tag: "Fresh" },
-  { id: "bread", name: "Bread", price: 180, unit: "/ 1 pack", image: "/products/white-bread.png", tag: "Best Seller" },
-  { id: "milk", name: "Milk", price: 220, unit: "/ 1L", image: "/products/milk.png", tag: "Daily" },
-  { id: "flour", name: "Flour", price: 1100, unit: "/ 10 kg", image: "/products/flour.png", tag: "Bakery" },
-  { id: "rice", name: "Rice", price: 400, unit: "/ 1 kg", image: "/products/rice.png", tag: "Seasonal" },
-  { id: "eggs", name: "Eggs", price: 350, unit: "/ 1 dozen", image: "/products/eggs.png", tag: "Organic" },
-  { id: "cooking-oil", name: "Cooking Oil", price: 520, unit: "/ 1 kg", image: "/products/oil.png", tag: "Pantry" },
-  { id: "chips", name: "Chips", price: 60, unit: "/ 1 pack", image: "/products/milk.png", tag: "Fresh" },
-];
 
 const features = [
   {
@@ -95,11 +86,24 @@ const features = [
 ];
 
 export default async function Home() {
-  await seedCategories();
+  await connectToDatabase();
 
   const categoryDocs = await Category.find({})
     .sort({ order: 1 })
     .lean<ICategory[]>();
+  const productDocs = await Product.find({})
+    .sort({ order: 1 })
+    .limit(8)
+    .lean<IProduct[]>();
+  const products: FeaturedProduct[] = productDocs.map((p) => ({
+    id: p.slug,
+    slug: p.slug,
+    name: p.name,
+    price: p.price,
+    unit: p.unit ?? "",
+    image: p.image,
+    tag: p.tag ?? "",
+  }));
   const categories = categoryDocs.map((c) => ({
     _id: c._id.toString(),
     name: c.name,
@@ -130,33 +134,9 @@ export default async function Home() {
               pantry staples — handpicked daily and delivered to your door.
             </p>
 
-            <form className="mt-8 flex max-w-md items-center gap-2 rounded-full bg-white p-1.5 shadow-sm ring-1 ring-border focus-within:ring-brand">
-              <span className="pl-3">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-5 w-5"
-                >
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                placeholder="Search for fruits, snacks, drinks…"
-                className="min-w-0 flex-1 bg-transparent px-2 py-2 text-sm outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-full bg-brand px-5 py-2 text-sm font-medium text-white hover:bg-brand-dark"
-              >
-                Search
-              </button>
-            </form>
+            <div className="mt-8">
+              <SearchBox />
+            </div>
 
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm">
               <div className="flex items-center gap-2">
