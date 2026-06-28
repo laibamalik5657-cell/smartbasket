@@ -134,6 +134,7 @@ export type AssignOrderInput = z.infer<typeof assignOrderSchema>;
 export const orderStatusEnum = z.enum([
   "pending",
   "assigned",
+  "out_for_delivery",
   "delivered",
   "cancelled",
 ]);
@@ -141,3 +142,10 @@ export const orderStatusEnum = z.enum([
 export const orderStatusQuerySchema = z.object({
   status: orderStatusEnum.optional(),
 });
+
+// Rider advances their own order: assigned → out_for_delivery → delivered.
+export const riderOrderUpdateSchema = z.object({
+  status: z.enum(["out_for_delivery", "delivered"]),
+});
+
+export type RiderOrderUpdateInput = z.infer<typeof riderOrderUpdateSchema>;

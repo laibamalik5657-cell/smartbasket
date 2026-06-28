@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     await connectToDatabase();
     const docs = await Order.find({
       riderId: rider.id,
-      status: { $in: ["assigned", "delivered"] },
+      status: { $in: ["assigned", "out_for_delivery", "delivered"] },
     })
       .sort({ createdAt: -1 })
       .lean<IOrder[]>();

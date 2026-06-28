@@ -26,8 +26,9 @@ export interface IOrder {
   shipping: number;
   total: number;
   payment: string;
-  status: "pending" | "assigned" | "delivered" | "cancelled";
+  status: "pending" | "assigned" | "out_for_delivery" | "delivered" | "cancelled";
   riderId?: mongoose.Types.ObjectId;
+  outForDeliveryAt?: Date;
   customer: IOrderCustomer;
   createdAt: Date;
 }
@@ -71,7 +72,7 @@ const OrderSchema = new Schema<IOrder>(
     payment: { type: String, required: true },
     status: {
       type: String,
-      enum: ["pending", "assigned", "delivered", "cancelled"],
+      enum: ["pending", "assigned", "out_for_delivery", "delivered", "cancelled"],
       default: "pending",
       index: true,
     },
@@ -80,6 +81,7 @@ const OrderSchema = new Schema<IOrder>(
       ref: "User",
       index: true,
     },
+    outForDeliveryAt: { type: Date },
     customer: { type: OrderCustomerSchema, required: true },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
@@ -97,8 +99,9 @@ export interface PlainOrder {
   shipping: number;
   total: number;
   payment: string;
-  status: "pending" | "assigned" | "delivered" | "cancelled";
+  status: "pending" | "assigned" | "out_for_delivery" | "delivered" | "cancelled";
   riderId: string | null;
+  outForDeliveryAt: string | null;
   customer: IOrderCustomer;
   createdAt: string;
 }
@@ -122,6 +125,9 @@ export function toPlainOrder(o: IOrder): PlainOrder {
     payment: o.payment,
     status: o.status ?? "pending",
     riderId: o.riderId ? o.riderId.toString() : null,
+    outForDeliveryAt: o.outForDeliveryAt
+      ? new Date(o.outForDeliveryAt).toISOString()
+      : null,
     customer: o.customer,
     createdAt:
       o.createdAt instanceof Date
